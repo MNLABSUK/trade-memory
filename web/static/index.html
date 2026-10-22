@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trade Memory — Halden & Rook desk</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css?v=tm3" />
+</head>
+<body>
+  <div id="toast" class="toast hidden" role="status"></div>
+  <div id="bootError" class="boot-error hidden" role="alert"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark" aria-hidden="true">◉</span>
+      <div>
+        <h1>Trade Memory</h1>
+        <p class="tagline">Remembers the chase. You approve the send.</p>
+      </div>
+    </div>
+    <div class="chips">
+      <span class="chip chip-lab">MN Labs · Open Agent 2026</span>
+      <span class="chip persist-chip" title="JSON memory (clients · jobs · chases · notes · decisions) survives process restart">Persistent</span>
+      <button id="digestBtn" class="chip chip-btn-top chip-digest" type="button" title="Ranked overdue + suggested work order">Morning digest</button>
+      <button id="failBtn" class="chip chip-btn-top chip-fail" type="button" title="Honest failure modes">Failure modes</button>
+      <span id="dryBadge" class="chip chip-dry hidden">Dry-run</span>
+      <span id="providerLine" class="chip chip-quiet settings-chip">Connecting…</span>
+    </div>
+  </header>
+
+  <div class="stats-strip" aria-label="Desk stats">
+    <div class="stat stat-overdue">
+      <span class="stat-label">Overdue £</span>
+      <span id="statOverdue" class="stat-value money-chip">£—</span>
+    </div>
+    <span class="stat-sep">·</span>
+    <div class="stat"><span class="stat-label">Open</span><span id="statOpen" class="stat-value">—</span></div>
+    <span class="stat-sep">·</span>
+    <div class="stat"><span class="stat-label">Later</span><span id="statLater" class="stat-value">—</span></div>
+    <span class="stat-sep">·</span>
+    <div class="stat"><span class="stat-label">Notes</span><span id="statNotes" class="stat-value">—</span></div>
+    <span class="stat-sep">·</span>
+    <div class="stat"><span class="stat-label">Clients</span><span id="statClients" class="stat-value">—</span></div>
+    <span class="stat-sep">·</span>
+    <div class="stat"><span class="stat-label">Decisions today</span><span id="statDecisions" class="stat-value">—</span></div>
+  </div>
+
+  <main class="desk-grid">
+    <!-- LEFT: Memory + jobs/clients -->
+    <aside class="col col-left" aria-label="Memory">
+      <section class="paper pane">
+        <div class="pane-head">
+          <h2>Memory</h2>
+          <button id="recallBtn" class="btn ghost btn-sm" type="button">What were we chasing?</button>
+        </div>
+        <div class="recall-box">
+          <input id="recallInput" type="text" placeholder="Ask memory…" value="what were we chasing?" />
+          <button id="recallGo" class="btn navy btn-sm" type="button">Recall</button>
+        </div>
+        <div id="recallAnswer" class="recall-answer">Memory loads after health…</div>
+        <div id="notesList" class="scroll-list notes-list"></div>
+        <div class="note-compose">
+          <input id="noteInput" type="text" placeholder="Add a persistent note…" />
+          <button id="noteBtn" class="btn navy btn-sm" type="button">Add</button>
+        </div>
+      </section>
+
+      <section class="paper pane compact">
+        <div class="pane-head"><h2>Jobs / Clients</h2></div>
+        <div id="jobsClientsList" class="scroll-list mini-list"></div>
+      </section>
+    </aside>
+
+    <!-- CENTER: Open chases -->
+    <section class="col col-center" aria-label="Chases">
+      <div class="paper pane fill">
+        <div class="pane-head">
+          <h2>Chases</h2>
+          <div class="toggle-row">
+            <button id="showOpen" class="btn ghost btn-sm active-toggle" type="button">Open</button>
+            <button id="showClosed" class="btn ghost btn-sm" type="button">Closed / Later</button>
+            <span id="chaseCount" class="side-count"></span>
+          </div>
+        </div>
+        <div id="chaseList" class="scroll-list chase-list">
+          <div class="empty-state">Loading…</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: Detail + activity -->
+    <section class="col col-right" aria-label="Chase desk">
+      <div class="paper pane fill desk-pane">
+        <div class="desk-chrome">
+          <div>
+            <div class="desk-name">Chase desk</div>
+            <div class="desk-sub">Remember · propose · decide</div>
+          </div>
+          <span class="ambient-wrap" id="ambientWrap">
+            <span class="ambient-ring"><span class="ambient-core"></span></span>
+            <span class="pulse-label" id="pulseLabel">Ready</span>
+          </span>
+        </div>
+
+        <div id="emptyState" class="empty">
+          <div class="empty-illustration">◉</div>
+          <p class="empty-lead">Nothing selected</p>
+          <p class="hint">Three steps to demo persistent chase memory:</p>
+          <ol class="empty-steps">
+            <li>Tap <strong>Morning digest</strong> or ask “what were we chasing?”</li>
+            <li><strong>Propose next</strong> — edit the draft (Halden & Rook Ops)</li>
+            <li><strong>Approve</strong> — human gate; memory keeps the decision</li>
+          </ol>
+        </div>
+
+        <div id="detail" class="detail hidden">
+          <div id="digestPanel" class="digest-panel hidden"></div>
+          <div class="detail-meta">
+            <span id="detailUrgency" class="urgency"></span>
+            <span id="detailStatus" class="pill"></span>
+            <span id="detailMoney" class="money-chip hidden"></span>
+          </div>
+          <h2 id="detailSubject"></h2>
+          <p class="from" id="detailFrom"></p>
+          <p class="recv" id="detailMeta"></p>
+          <p class="contact-line" id="detailContact"></p>
+          <p class="address-line" id="detailAddress"></p>
+          <pre class="body" id="detailBody"></pre>
+
+          <div id="priorDecisions" class="prior-box hidden">
+            <div class="prior-label">Prior decisions</div>
+            <ul id="priorList"></ul>
+          </div>
+
+          <div class="agent-card">
+            <div class="agent-head">
+              <div>
+                <strong>Next action</strong>
+                <span id="triageState" class="triage-state muted">Not proposed yet</span>
+              </div>
+              <div class="agent-actions">
+                <button id="proposeBtn" class="btn navy btn-sm" type="button">Propose next</button>
+                <button id="reopenBtn" class="btn ghost btn-sm hidden" type="button">Reopen</button>
+              </div>
+            </div>
+            <div id="thinkingPanel" class="thinking-panel hidden">
+              <span class="thinking-dots"><span></span><span></span><span></span></span>
+              <span class="thinking-label">Consulting memory…</span>
+            </div>
+            <p id="agentSummary" class="agent-summary muted"></p>
+            <label class="draft-label" for="draftArea">Editable draft</label>
+            <textarea id="draftArea" class="draft-area" rows="7" placeholder="Proposal appears here…"></textarea>
+            <div class="decide-bar">
+              <button id="approveBtn" class="btn approve" type="button">Approve</button>
+              <button id="leaveBtn" class="btn leave" type="button">Leave it</button>
+              <button id="laterBtn" class="btn later" type="button">Later</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="approvedStrip" class="approved-strip hidden">
+          <div class="approved-strip-label">Approved this session</div>
+          <div id="approvedBody" class="approved-strip-body"></div>
+        </div>
+
+        <div class="activity-block">
+          <div class="pane-head tight"><h2>Activity</h2></div>
+          <div id="activityList" class="scroll-list activity-list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="followup-bar">
+    <div class="suggest-row" id="suggestChips">
+      <button class="chip-btn chip-money" type="button" data-action="digest">Morning digest</button>
+      <button class="chip-btn" type="button" data-q="what were we chasing?">What were we chasing?</button>
+      <button class="chip-btn" type="button" data-q="Fernhill">Fernhill</button>
+      <button class="chip-btn" type="button" data-q="Larch">Larch</button>
+      <button class="chip-btn" type="button" data-q="what's overdue?">What's overdue?</button>
+    </div>
+    <form id="followupForm" class="followup-form" autocomplete="off">
+      <input id="followupInput" type="text" placeholder="Follow-up: who’s Fernhill? / what’s overdue? / draft chase for Oak…" />
+      <button class="btn navy" type="submit">Ask</button>
+    </form>
+  </footer>
+  <p class="footer-note">Trade Memory v0.3 · Halden & Rook Ops / MN Labs · human gate on every send</p>
+
+  <!-- Failure modes drawer -->
+  <div id="failBackdrop" class="drawer-backdrop hidden" aria-hidden="true"></div>
+  <aside id="failDrawer" class="drawer hidden" role="dialog" aria-label="Failure modes">
+    <div class="drawer-head">
+      <h2>Failure modes</h2>
+      <button id="failClose" class="btn ghost btn-sm" type="button">Close</button>
+    </div>
+    <div class="drawer-body" id="failBody">
+      <div class="fail-item">
+        <strong>Bad / stale contacts</strong>
+        <p>Owner mobiles bounce; finance emails change term-to-term. Notes may lag reality.</p>
+        <span class="fail-mitigated">Mitigated · prefer accounts@ from notes</span>
+      </div>
+      <div class="fail-item">
+        <strong>LLM placeholder drafts</strong>
+        <p>Live Nebius can emit [Your Name] / [Company Name]. Scrubbed to Halden & Rook Ops + real client.contact.</p>
+        <span class="fail-mitigated">Mitigated · scrub + dry-run fallback</span>
+      </div>
+      <div class="fail-item">
+        <strong>Memory conflict</strong>
+        <p>Two sessions editing the same chase can race; last write wins on JSON flush.</p>
+      </div>
+      <div class="fail-item">
+        <strong>Dry-run fallback</strong>
+        <p>Without NEBIUS_API_KEY (or on API error) heuristics draft instead of Nemotron — still needs Approve.</p>
+        <span class="fail-mitigated">Expected · demo-safe</span>
+      </div>
+      <div class="fail-item">
+        <strong>Human gate necessity</strong>
+        <p>Agent never auto-sends money, invoices, or legal commitments. Approve / Leave / Later is mandatory.</p>
+        <span class="fail-mitigated">By design</span>
+      </div>
+    </div>
+  </aside>
+
+  <script src="/static/app.js?v=tm3"></script>
+</body>
+</html>
