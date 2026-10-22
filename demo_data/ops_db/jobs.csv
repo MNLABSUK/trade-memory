@@ -1,0 +1,23 @@
+job_id,client_code,client_name,title,site_address,lead_electrician,start_date,completed_date,quoted_value_gbp,po_number
+JOB-501,LARK,Larkfield Lettings,Socket repair,"14 Brudenell Mount, Leeds",Imogen Teale,2026-07-08,2026-07-08,210.00,
+JOB-502,LARK,Larkfield Lettings,Landlord EICR remedials,"3 Kirkstall Rise, Leeds",Rhys Calder,2026-07-12,2026-07-12,145.00,
+JOB-503,LARK,Larkfield Lettings,EICR,"27 Headingley Grove, Leeds",Callum Pryor,2026-07-18,2026-07-18,180.00,
+JOB-504,LARK,Larkfield Lettings,EICR,"9 Meanwood Walk, Leeds",Rhys Calder,2026-07-26,2026-07-26,180.00,
+JOB-505,LARK,Larkfield Lettings,Outside light,"41 Chapel Allerton Row, Leeds",Callum Pryor,2026-07-30,2026-07-30,210.00,
+JOB-506,LARK,Larkfield Lettings,EICR,"6 Burley Terrace, Leeds",Callum Pryor,2026-08-07,2026-08-07,265.00,
+JOB-507,LARK,Larkfield Lettings,Smoke alarm swap,"18 Armley Lane, Leeds",Lena Marsh,2026-08-11,2026-08-11,385.00,
+JOB-508,LARK,Larkfield Lettings,Socket repair,"2 Hyde Park Close, Leeds",Wes Okafor,2026-08-17,2026-08-17,180.00,
+JOB-509,LARK,Larkfield Lettings,EICR,"55 Roundhay View, Leeds",Imogen Teale,2026-08-23,2026-08-23,265.00,
+JOB-510,LARK,Larkfield Lettings,Consumer unit fault,"11 Woodhouse Court, Leeds",Wes Okafor,2026-08-29,2026-08-29,265.00,
+JOB-511,LARK,Larkfield Lettings,Landlord EICR remedials,"7 Beeston Hill, Leeds",Rhys Calder,2026-09-04,2026-09-04,145.00,
+JOB-512,LARK,Larkfield Lettings,EICR,"30 Horsforth Gate, Leeds",Dan Ashby,2026-09-10,2026-09-10,240.00,
+JOB-513,LARK,Larkfield Lettings,Socket repair,"16 Otley Road Flat 2, Leeds",Lena Marsh,2026-09-18,2026-09-18,180.00,
+JOB-514,LARK,Larkfield Lettings,Landlord EICR remedials,"22 Moortown Crescent, Leeds",Rhys Calder,2026-09-23,2026-09-23,145.00,
+JOB-515,COPP,Copperbeech Dental Group,"Full rewire, Chapeltown practice","Copperbeech Dental, 88 Harehills Road, Leeds",Wes Okafor,2026-08-10,2026-09-18,18400.00,
+JOB-516,COPP,Copperbeech Dental Group,Emergency lighting test,"Copperbeech Dental, 4 Roundhay Parade, Leeds",Wes Okafor,2026-08-08,2026-08-08,420.00,
+JOB-517,COPP,Copperbeech Dental Group,Emergency lighting test,"Copperbeech Dental, 19 Otley Old Rd, Leeds",Wes Okafor,2026-07-22,2026-07-22,610.00,
+JOB-518,MOSS,Mosswood Academy Trust,"LED lighting upgrade, sports hall","Mosswood Academy, Stonegate Lane, Leeds",Wes Okafor,2026-08-24,2026-08-28,6850.00,PO-MAT-77412
+JOB-519,MOSS,Mosswood Academy Trust,"PAT testing, main block","Mosswood Academy, Stonegate Lane, Leeds",Callum Pryor,2026-07-14,2026-07-15,940.00,PO-MAT-76980
+JOB-520,BRIN,Brindle & Oak Cafés,Kitchen circuits + new commercial oven supply,"Brindle & Oak, 12 Call Lane, Leeds",Dan Ashby,2026-08-27,2026-08-28,2450.00,
+JOB-521,BRIN,Brindle & Oak Cafés,"Fault find, café lighting","Brindle & Oak, 3 Kirkgate, Leeds",Rhys Calder,2026-06-30,2026-06-30,290.00,
+JOB-522,KEST,Kestrel Self Storage,Gate access + yard floodlights,"Kestrel Self Storage, Unit 4 Stourton Ind Est, Leeds",Wes Okafor,2026-09-07,2026-09-09,1800.00,

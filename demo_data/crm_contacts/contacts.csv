@@ -1,0 +1,11 @@
+contact_id,client_code,client_name,name,role,email,phone,preferred_channel,email_bounced,bounce_since,notes
+C-001,LARK,Larkfield Lettings,Accounts team,Accounts payable,accounts@larkfield-lettings.example,0113 496 0101,email,true,2026-09-03,Shared mailbox; returning 550 since early Sept
+C-002,LARK,Larkfield Lettings,Nadia Ferrow,Finance officer,finance@larkfield-lettings.example,0113 496 0102,email,false,,Took over AP Sept 2026; remittance refs LL-PAY-xxxx
+C-003,LARK,Larkfield Lettings,Gareth Lowe,Property manager,gareth@larkfield-lettings.example,07700 900101,phone,false,,
+C-004,COPP,Copperbeech Dental Group,Ruth Okonjo,Practice manager,ruth.okonjo@copperbeech-dental.example,0113 496 0201,email,false,,
+C-005,COPP,Copperbeech Dental Group,Simon Arkwright,Group finance,finance@copperbeech-dental.example,0113 496 0202,email,false,,Holding balance pending snag
+C-006,MOSS,Mosswood Academy Trust,Trust AP,Accounts payable,ap@mosswood-trust.example,0113 496 0301,portal,false,,Invoices must quote PO number; upload via supplier portal
+C-007,MOSS,Mosswood Academy Trust,Helen Pike,Site manager,h.pike@mosswood-trust.example,0113 496 0302,email,false,,
+C-008,BRIN,Brindle & Oak Cafés,Jonty Brindle,Owner,jonty@brindleandoak.example,07700 900401,phone,false,,Rarely reads email; pays same day when phoned
+C-009,KEST,Kestrel Self Storage,Asha Merriman,Site manager,asha@kestrel-storage.example,07700 900501,email,false,,
+C-010,KEST,Kestrel Self Storage,KSS Operations accounts,Accounts payable (parent co.),ap@kss-operations.example,0113 496 0502,email,false,,Parent company pays supplier invoices; uses own payment run numbers

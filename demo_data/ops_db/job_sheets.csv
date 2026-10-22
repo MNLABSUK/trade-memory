@@ -1,0 +1,20 @@
+job_sheet_id,job_id,visit_date,sheet_type,electrician,notes,snag_status,snag_closed_date,photo_ref,signed_off_by
+JS-201,JOB-501,2026-07-08,completion,Imogen Teale,"Work complete, tenant present",,,,Tenant
+JS-202,JOB-502,2026-07-12,completion,Rhys Calder,"Work complete, tenant present",,,,Tenant
+JS-203,JOB-503,2026-07-18,completion,Callum Pryor,"Work complete, tenant present",,,,Tenant
+JS-204,JOB-504,2026-07-26,completion,Rhys Calder,"Work complete, tenant present",,,,Tenant
+JS-205,JOB-505,2026-07-30,completion,Callum Pryor,"Work complete, tenant present",,,,Tenant
+JS-206,JOB-506,2026-08-07,completion,Callum Pryor,"Work complete, tenant present",,,,Tenant
+JS-207,JOB-507,2026-08-11,completion,Lena Marsh,"Work complete, tenant present",,,,Tenant
+JS-208,JOB-508,2026-08-17,completion,Wes Okafor,"Work complete, tenant present",,,,Tenant
+JS-209,JOB-509,2026-08-23,completion,Imogen Teale,"Work complete, tenant present",,,,Tenant
+JS-210,JOB-510,2026-08-29,completion,Wes Okafor,"Work complete, tenant present",,,,Tenant
+JS-211,JOB-511,2026-09-04,completion,Rhys Calder,"Work complete, tenant present",,,,Tenant
+JS-212,JOB-512,2026-09-10,completion,Dan Ashby,"Work complete, tenant present",,,,Tenant
+JS-213,JOB-513,2026-09-18,completion,Lena Marsh,"Work complete, tenant present",,,,Tenant
+JS-214,JOB-514,2026-09-23,completion,Rhys Calder,"Work complete, tenant present",,,,Tenant
+JS-215,JOB-515,2026-09-18,completion,Wes Okafor,Rewire complete; snag: surgery 3 dental chair spur not on dedicated RCBO,open,,,Practice manager
+JS-216,JOB-515,2026-10-02,snag,Wes Okafor,"Surgery 3 chair spur moved to dedicated RCBO, tested, cert updated",closed,2026-10-02,photos/JS-snag-surgery3-rcbo.jpg,R. Okonjo (practice manager)
+JS-217,JOB-518,2026-08-28,completion,Wes Okafor,"48 high-bay LEDs fitted, emergency circuit tested",,,,Site manager
+JS-218,JOB-520,2026-08-28,completion,Dan Ashby,Oven supply 32A radial installed and tested,,,,Owner
+JS-219,JOB-522,2026-09-09,completion,Wes Okafor,2 floodlights + gate supply; signed off,,,,Site manager

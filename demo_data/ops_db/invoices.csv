@@ -1,0 +1,23 @@
+invoice_id,client_code,client_name,job_id,issue_date,due_date,net_gbp,vat_gbp,total_gbp,amount_paid_gbp,status,po_number,notes
+INV-1001,LARK,Larkfield Lettings,JOB-501,2026-07-09,2026-08-08,210.00,42.00,252.00,252.00,paid,,
+INV-1002,LARK,Larkfield Lettings,JOB-502,2026-07-13,2026-08-12,145.00,29.00,174.00,174.00,paid,,
+INV-1003,LARK,Larkfield Lettings,JOB-503,2026-07-19,2026-08-18,180.00,36.00,216.00,216.00,paid,,
+INV-1004,LARK,Larkfield Lettings,JOB-504,2026-07-27,2026-08-26,180.00,36.00,216.00,216.00,paid,,
+INV-1005,LARK,Larkfield Lettings,JOB-505,2026-07-31,2026-08-30,210.00,42.00,252.00,252.00,paid,,
+INV-1006,LARK,Larkfield Lettings,JOB-506,2026-08-08,2026-09-07,265.00,53.00,318.00,318.00,paid,,
+INV-1007,LARK,Larkfield Lettings,JOB-507,2026-08-12,2026-09-11,385.00,77.00,462.00,0.00,sent,,
+INV-1008,LARK,Larkfield Lettings,JOB-508,2026-08-18,2026-09-17,180.00,36.00,216.00,0.00,sent,,
+INV-1009,LARK,Larkfield Lettings,JOB-509,2026-08-24,2026-09-23,265.00,53.00,318.00,0.00,sent,,
+INV-1010,LARK,Larkfield Lettings,JOB-510,2026-08-30,2026-09-29,265.00,53.00,318.00,0.00,sent,,
+INV-1011,LARK,Larkfield Lettings,JOB-511,2026-09-05,2026-10-05,145.00,29.00,174.00,0.00,sent,,
+INV-1012,LARK,Larkfield Lettings,JOB-512,2026-09-11,2026-10-11,240.00,48.00,288.00,0.00,sent,,
+INV-1013,LARK,Larkfield Lettings,JOB-513,2026-09-19,2026-10-19,180.00,36.00,216.00,0.00,sent,,
+INV-1014,LARK,Larkfield Lettings,JOB-514,2026-09-24,2026-10-24,145.00,29.00,174.00,0.00,sent,,
+INV-1015,COPP,Copperbeech Dental Group,JOB-515,2026-09-19,2026-10-19,15333.33,3066.67,18400.00,9200.00,part_paid,,"Total incl VAT £18,400; 50% stage payment received"
+INV-1016,COPP,Copperbeech Dental Group,JOB-516,2026-08-08,2026-09-07,420.00,84.00,504.00,504.00,paid,,
+INV-1017,COPP,Copperbeech Dental Group,JOB-517,2026-07-22,2026-08-21,610.00,122.00,732.00,732.00,paid,,
+INV-1018,MOSS,Mosswood Academy Trust,JOB-518,2026-09-01,2026-10-01,6850.00,1370.00,8220.00,0.00,rejected,,Rejected by trust AP portal 2026-09-08: no PO on invoice
+INV-1019,MOSS,Mosswood Academy Trust,JOB-519,2026-07-16,2026-08-15,940.00,188.00,1128.00,1128.00,paid,PO-MAT-76980,
+INV-1020,BRIN,Brindle & Oak Cafés,JOB-520,2026-08-31,2026-09-14,2450.00,490.00,2940.00,0.00,sent,,
+INV-1021,BRIN,Brindle & Oak Cafés,JOB-521,2026-07-01,2026-07-15,290.00,58.00,348.00,348.00,paid,,Paid after phone call 2026-07-24
+INV-1043,KEST,Kestrel Self Storage,JOB-522,2026-09-10,2026-10-10,1800.00,360.00,2160.00,0.00,sent,,

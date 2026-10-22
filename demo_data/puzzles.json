@@ -1,0 +1,88 @@
+{
+  "firm": "Halden & Rook Electrical Ltd",
+  "today": "2026-10-22",
+  "seed": 20261022,
+  "puzzles": [
+    {
+      "id": "P1",
+      "client": "Kestrel Self Storage",
+      "title": "Unmatched £2,160 receipt",
+      "sources": [
+        "bank_feed",
+        "ops_db",
+        "crm_contacts"
+      ],
+      "expected": "Do not chase: BL-0078 (£2,160, ref 7781, KSS OPERATIONS LTD) matches INV-1043 total £2,160 by amount within date window; KSS Operations is Kestrel's paying parent (C-010).",
+      "evidence": [
+        "BL-0078",
+        "INV-1043",
+        "C-010"
+      ]
+    },
+    {
+      "id": "P2",
+      "client": "Larkfield Lettings",
+      "title": "Bounced accounts@ contact",
+      "sources": [
+        "crm_contacts",
+        "inbox_export"
+      ],
+      "expected": "accounts@ has bounced 3x since Sept; re-send chase for unpaid invoices to finance@ (Nadia Ferrow).",
+      "evidence": [
+        "C-001",
+        "C-002",
+        "MSG-0002",
+        "MSG-0004",
+        "MSG-0006"
+      ]
+    },
+    {
+      "id": "P3",
+      "client": "Copperbeech Dental Group",
+      "title": "Dispute vs job sheet evidence",
+      "sources": [
+        "ops_db.job_sheets",
+        "ops_db.invoices",
+        "inbox_export"
+      ],
+      "expected": "Email (5 Oct) claims snag open, but JS-216 closed it 2 Oct with photo and sign-off; chase £9,200 balance on INV-1015 citing JS-216.",
+      "evidence": [
+        "JS-216",
+        "INV-1015"
+      ]
+    },
+    {
+      "id": "P4",
+      "client": "Mosswood Academy Trust",
+      "title": "Missing PO on invoice",
+      "sources": [
+        "ops_db.invoices",
+        "ops_db.jobs",
+        "crm_contacts"
+      ],
+      "expected": "INV-1018 rejected for no PO; job JOB-518 carries PO-MAT-77412; reissue with PO via portal.",
+      "evidence": [
+        "INV-1018",
+        "JOB-518",
+        "C-006"
+      ]
+    },
+    {
+      "id": "P5",
+      "client": "Brindle & Oak Cafés",
+      "title": "Broken 'Friday' promises",
+      "sources": [
+        "inbox_export",
+        "crm_contacts",
+        "bank_feed"
+      ],
+      "expected": "Two missed 'Friday' promises (2 Oct, 16 Oct), emails ignored, no bank credit; phone Jonty, don't email.",
+      "evidence": [
+        "INV-1020",
+        "C-008",
+        "MSG-0011",
+        "MSG-0012"
+      ]
+    }
+  ]
+}
