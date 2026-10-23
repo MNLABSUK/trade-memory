@@ -1,6 +1,6 @@
 # Trade Memory
 
-**Persistent chase memory** for small UK trades / contractors (Halden & Rook–style CCTV ops + Larch workshop demo).
+**Persistent chase memory** for small UK trades / contractors (fictional Halden & Rook Electrical Ltd, Leeds — see `demo_data/`).
 
 Primary track: **Real-World Industry Agents** (Open Agent Hackathon 2026 / GenAI.Works).  
 Secondary narrative: **Persistent Memory Agents**.
@@ -12,7 +12,7 @@ This is **not** a Desk Gate clone. Desk Gate is an inbox triage desk; Trade Memo
 
 ## Finalist (v0.3)
 
-- **Agent drafts** — Halden & Rook Ops / MN Labs sign-off; real `client.contact` + job address; bounce-aware preferred contact; placeholder scrub; temp 0.15
+- **Agent drafts** — Halden & Rook Electrical sign-off; real `client.contact` + job address; bounce-aware preferred contact; placeholder scrub; temp 0.15
 - **Morning digest** — `GET/POST /api/digest` ranks overdue £, suggested work order, one-line memory recall; UI chip selects top chase
 - **Visual polish** — Desk Gate cream/navy DNA on 3-col desk (sticky blur topbar, paper cards, urgency pills, Approve-primary decide bar, elevated follow-up, toast)
 - **Failure modes** — topbar drawer + README section (submission req 6.3)
@@ -24,10 +24,10 @@ This is **not** a Desk Gate clone. Desk Gate is an inbox triage desk; Trade Memo
 - **Richer propose context** — related job, recent notes, prior decisions, recall summary fed into Nebius / dry-run
 - **Broad recall** — substring search across clients, jobs, chases, notes, invoice refs; returns matched_* + focus
 - **Chase lifecycle** — reopen closed/later chases; optional `snooze_until` on Later; activity filter by chase
-- **Follow-up chat** — `/api/followup` for “what’s overdue?”, “who is Fernhill?”, “draft chase for Oak”
+- **Follow-up chat** — `/api/followup` for “what’s overdue?”, “who is Larkfield?”, “draft chase for Kestrel”
 - **Activity stats** — `decisions_today`, `later_count` on `/api/activity` + health
 - **3-column cream/navy desk** — Memory | Chases | Detail+Activity, follow-up bar, demo chips, Esc clears selection
-- **Seed v2** — chase history strings, closed Larch chase with prior decision, demo memory thread
+- **Seed v2** — chase history strings, closed Mosswood chase with prior decision, demo memory thread
 
 ## Quick start
 
@@ -57,10 +57,10 @@ Without `NEBIUS_API_KEY`, the app runs in **dry-run** (deterministic heuristics)
 
 1. Open http://127.0.0.1:43151/ — stats strip shows overdue £, open, later, notes, clients.
 2. Click **Morning digest** — ranked overdue + £ total; top chase selected; recall filled.
-3. Or ask **What were we chasing?** — recall focuses Fernhill; center list highlights the chase.
+3. Or ask **What were we chasing?** — recall focuses Larkfield; center list highlights the chase.
 4. Click **Propose next** — draft appears with job address / contact context (dry-run or Nebius).
 5. Edit draft → **Later** (or Approve / Leave it) — activity trail updates; chase moves to Closed/Later.
-6. Restart the server → ask recall again — same focus / notes prove **persistence**. Try follow-up: “who’s Larch?” / “draft chase for Oak” / **Reopen** on a closed chase.
+6. Restart the server → ask recall again — same focus / notes prove **persistence**. Try follow-up: “who’s Mosswood?” / “draft chase for Kestrel” / **Reopen** on a closed chase.
 
 ## What persists
 
@@ -115,7 +115,7 @@ pytest -q
 | Mode | What happens | Mitigation |
 |------|----------------|------------|
 | Bad / stale contacts | Owner mobiles bounce; finance emails change | Prefer `accounts@` from notes; show contact on desk |
-| LLM placeholder drafts | Nebius may emit `[Your Name]` / `[Company Name]` | SYSTEM_PROMPT + scrub → Halden & Rook Ops + real contact; dry-run fallback |
+| LLM placeholder drafts | Nebius may emit `[Your Name]` / `[Company Name]` | SYSTEM_PROMPT + scrub → Halden & Rook + real contact; dry-run fallback |
 | Memory conflict | Concurrent sessions race on JSON flush | Last write wins; single-desk demo assumed |
 | Dry-run fallback | No API key or Nebius error | Deterministic heuristics; still needs Approve |
 | Human gate necessity | Agent must not auto-send money/invoices | `needs_human` always true; Approve / Leave / Later only |

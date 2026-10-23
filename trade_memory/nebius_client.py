@@ -13,17 +13,17 @@ from trade_memory.llm import chat_completion
 from trade_memory.dry_run import propose as dry_run_propose
 from trade_memory.models import Chase, Client, Job, ProposeResult
 
-SYSTEM_PROMPT = """You are Trade Memory for Halden & Rook Ops / MN Labs — a small UK CCTV & security
-trades desk. Draft short chase emails and WhatsApp-ready texts for the human to approve.
+SYSTEM_PROMPT = """You are Trade Memory for Halden & Rook Electrical — a small Leeds electrical contractor's
+accounts desk. Draft short chase emails and WhatsApp-ready texts for the human to approve.
 
 You receive desk context: chase, client (with contact), job (address/amount/notes),
 recent memory notes, prior DecisionRecords, chase history, and a recall summary.
 
 CRITICAL RULES:
 - needs_human must always be true. Never auto-send money, invoices, contracts, or legal commitments.
-- Sign every draft as: Halden & Rook Ops / MN Labs desk (never [Your Name], [Company Name], or similar).
+- Sign every draft as: Tom Rook, Halden & Rook Electrical (never [Your Name], [Company Name], or similar).
 - Always use the real client.contact from context as the send-to address. If notes mention a bounce,
-  use the preferred contact from notes (e.g. accounts@) — never invent placeholders.
+  use the preferred contact from notes (e.g. finance@) — never invent placeholders.
 - Include the job address when present (one short line).
 - UK English. Short, practical, polite. Chase emails ~4–8 lines; WhatsApp texts ≤2 short paragraphs.
 - No markdown fences. No “As an AI”. No roleplay disclaimers.
@@ -57,30 +57,30 @@ def scrub_placeholders(
     contact: str = "",
     client_name: str = "",
 ) -> str:
-    """Replace LLM placeholder tokens with Halden & Rook Ops / real contact."""
+    """Replace LLM placeholder tokens with Halden & Rook / real contact."""
     if not text:
         return text
-    out = _PLACEHOLDER_RE.sub("Halden & Rook Ops", text)
-    out = re.sub(r"\[Your Name\]", "Halden & Rook Ops", out, flags=re.IGNORECASE)
-    out = re.sub(r"\[Company Name\]", "Halden & Rook Ops / MN Labs", out, flags=re.IGNORECASE)
+    out = _PLACEHOLDER_RE.sub("Halden & Rook", text)
+    out = re.sub(r"\[Your Name\]", "Halden & Rook", out, flags=re.IGNORECASE)
+    out = re.sub(r"\[Company Name\]", "Halden & Rook Electrical", out, flags=re.IGNORECASE)
     out = re.sub(r"\[Client Name\]", client_name or "the client", out, flags=re.IGNORECASE)
     out = re.sub(r"\[Contact\]", contact or "the finance contact", out, flags=re.IGNORECASE)
     out = re.sub(r"\[Email\]", contact or "accounts@", out, flags=re.IGNORECASE)
     # Strip leftover bracket tokens that look like form fields
-    out = re.sub(r"\[[A-Z][A-Za-z0-9 /_-]{2,40}\]", "Halden & Rook Ops", out)
+    out = re.sub(r"\[[A-Z][A-Za-z0-9 /_-]{2,40}\]", "Halden & Rook", out)
     if contact and "Send to" not in out and "@" not in out.split("\n")[0]:
         # Ensure contact appears when we scrubbed placeholders but draft lacked it
         pass
-    # Normalise weak closings to Halden & Rook Ops
+    # Normalise weak closings to Halden & Rook
     if re.search(r"(Best regards|Kind regards|Regards),?\s*$", out, re.IGNORECASE | re.MULTILINE):
         out = re.sub(
             r"(Best regards|Kind regards|Regards),?\s*$",
-            r"\1,\nHalden & Rook Ops / MN Labs desk",
+            r"\1,\nTom Rook, Halden & Rook Electrical",
             out,
             flags=re.IGNORECASE | re.MULTILINE,
         )
-    if "Halden & Rook" not in out and "MN Labs" not in out:
-        out = out.rstrip() + "\n\nHalden & Rook Ops / MN Labs desk"
+    if "Halden & Rook" not in out:
+        out = out.rstrip() + "\n\nTom Rook, Halden & Rook Electrical"
     return out.strip()
 
 
@@ -157,7 +157,7 @@ def _serialize_context(
         "prior_decisions": [dump(d) for d in (decisions or [])],
         "chase_history": list(history or chase.history or []),
         "recall_summary": recall_summary,
-        "sign_as": "Halden & Rook Ops / MN Labs desk",
+        "sign_as": "Tom Rook, Halden & Rook Electrical",
         "send_to": (client.contact if client else "") or "",
     }
 

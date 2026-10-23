@@ -40,14 +40,14 @@ def test_health_ok(client: TestClient):
     assert "decisions_today" in data
 
 
-def test_recall_search_fernhill(client: TestClient):
-    r = client.post("/api/recall", json={"query": "Fernhill"})
+def test_recall_search_larkfield(client: TestClient):
+    r = client.post("/api/recall", json={"query": "Larkfield"})
     assert r.status_code == 200
     body = r.json()
     assert body.get("focus")
     assert body["focus"]["id"] == "ch-001"
     names = [c["name"] for c in body.get("matched_clients", [])]
-    assert any("Fernhill" in n for n in names)
+    assert any("Larkfield" in n for n in names)
     assert "answer" in body
 
 
@@ -121,14 +121,14 @@ def test_followup_overdue_and_who(client: TestClient):
     assert r.json()["kind"] == "overdue"
     assert r.json()["focus_chase_id"]
 
-    r2 = client.post("/api/followup", json={"message": "who is Fernhill?"})
+    r2 = client.post("/api/followup", json={"message": "who is Larkfield?"})
     assert r2.status_code == 200
     assert r2.json()["kind"] == "who"
-    assert "Fernhill" in r2.json()["reply"]
+    assert "Larkfield" in r2.json()["reply"]
 
 
-def test_followup_draft_oak(client: TestClient):
-    r = client.post("/api/followup", json={"message": "draft chase for Oak"})
+def test_followup_draft_kestrel(client: TestClient):
+    r = client.post("/api/followup", json={"message": "draft chase for Kestrel"})
     assert r.status_code == 200
     assert r.json()["kind"] == "draft"
     assert r.json()["draft"]
@@ -140,7 +140,7 @@ def test_client_and_jobs_endpoints(client: TestClient):
     assert r.status_code == 200
     assert len(r.json()["jobs"]) >= 6
 
-    r2 = client.get("/api/clients/cli-larch")
+    r2 = client.get("/api/clients/cli-moss")
     assert r2.status_code == 200
     body = r2.json()
     assert body["client"]["name"]
@@ -160,10 +160,10 @@ def test_activity_stats(client: TestClient):
 def test_memory_persists_note(tmp_path: Path):
     path = tmp_path / "memory.json"
     s1 = MemoryStore(path=path)
-    s1.add_note("PERSISTENCE_PROOF deepen note", related_job_id="job-2841")
+    s1.add_note("PERSISTENCE_PROOF deepen note", related_job_id="job-507")
     raw = json.loads(path.read_text())
     assert any("PERSISTENCE_PROOF" in n["text"] for n in raw["notes"])
-    assert any(n.get("related_job_id") == "job-2841" for n in raw["notes"])
+    assert any(n.get("related_job_id") == "job-507" for n in raw["notes"])
 
     s2 = MemoryStore(path=path)
     assert any("PERSISTENCE_PROOF" in n.text for n in s2.list_notes())

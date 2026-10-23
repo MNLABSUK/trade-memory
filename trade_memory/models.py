@@ -14,7 +14,7 @@ ChaseStatus = Literal["open", "waiting", "closed", "later"]
 class Client(BaseModel):
     id: str
     name: str
-    trade: str = "CCTV / security"
+    trade: str = "Electrical contracting"
     contact: str = ""
     notes: list[str] = Field(default_factory=list)
 

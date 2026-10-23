@@ -1,4 +1,8 @@
-"""Seed Halden & Rook / Larch–style UK trade memory (deepened narrative)."""
+"""Seed Halden & Rook Electrical Ltd (Leeds) trade memory — fictional, mirrors demo_data/.
+
+Open chases match the five demo puzzles (P1–P5) and the unpaid rows in
+demo_data/ops_db/invoices.csv: £2,166 + £2,940 + £2,160 + £8,220 + £9,200 = £24,686.
+"""
 
 from __future__ import annotations
 
@@ -7,300 +11,145 @@ from datetime import datetime, timedelta, timezone
 from trade_memory.models import Chase, Client, DecisionRecord, Job, MemoryNote, SessionState
 
 NOW = datetime.now(timezone.utc)
+SIGN_OFF = "Tom Rook, Halden & Rook Electrical"
+
+
+def _d(days: int) -> str:
+    return (NOW - timedelta(days=days)).date().isoformat()
 
 
 def seed_payload() -> dict:
     clients = [
         Client(
-            id="cli-fernhill",
-            name="Fernhill School",
-            trade="CCTV service",
-            contact="accounts@fernhill.example",
-            notes=["Finance contact changed last term", "Prefer email over phone"],
-        ),
-        Client(
-            id="cli-quayside",
-            name="Quayside Bistro",
-            trade="Camera clean + recable",
-            contact="accounts@quaysidebistro.example",
-            notes=["Previous chase bounced — try accounts@", "Owner rarely answers mobile"],
-        ),
-        Client(
-            id="cli-elm",
-            name="Elm Court Flats",
-            trade="Camera realign + HDD",
-            contact="site@elmcourt.example",
-            notes=["Signed off on site — ready to invoice"],
-        ),
-        Client(
-            id="cli-birchlea",
-            name="Birch Lea Care Home",
-            trade="Call-out / lobby camera",
-            contact="manager@birchlea.example",
-            notes=["Lobby cam 2 flaky", "Install crew tomorrow morning"],
-        ),
-        Client(
-            id="cli-northgate",
-            name="Northgate Logistics (Unit 12)",
-            trade="New install quote",
-            contact="jo.hart@northgatelogistics.example",
-            notes=["Wants Hikvision or equivalent", "Ballpark this week"],
-        ),
-        Client(
-            id="cli-larch",
-            name="Larch Workshop (MN Labs demo)",
-            trade="Access control + NVR",
-            contact="ops@larch.example",
+            id="cli-lark",
+            name="Larkfield Lettings",
+            trade="Landlord EICRs + remedials",
+            contact="finance@larkfield-lettings.example",
             notes=[
-                "Demo client for Open Agent track",
-                "Persistent memory narrative — restart and ask what we were chasing",
+                "accounts@larkfield-lettings.example bouncing (550) since 3 Sep — C-001",
+                "Nadia Ferrow took over AP Sept 2026 — use finance@ (C-002)",
             ],
+        ),
+        Client(
+            id="cli-brin",
+            name="Brindle & Oak Cafés",
+            trade="Kitchen circuits + oven supply",
+            contact="jonty@brindleandoak.example",
+            notes=["Jonty Brindle rarely reads email; pays same day when phoned (07700 900401)"],
+        ),
+        Client(
+            id="cli-kest",
+            name="Kestrel Self Storage",
+            trade="Gate access + yard floodlights",
+            contact="ap@kss-operations.example",
+            notes=["Parent co. KSS Operations pays supplier invoices with its own run numbers (C-010)"],
+        ),
+        Client(
+            id="cli-moss",
+            name="Mosswood Academy Trust",
+            trade="LED lighting + PAT testing",
+            contact="ap@mosswood-trust.example",
+            notes=["Invoices must quote PO number; upload via supplier portal (C-006)"],
+        ),
+        Client(
+            id="cli-copp",
+            name="Copperbeech Dental Group",
+            trade="Full rewire + emergency lighting",
+            contact="finance@copperbeech-dental.example",
+            notes=["Simon Arkwright holding balance pending surgery 3 snag (C-005)"],
         ),
     ]
 
     jobs = [
-        Job(
-            id="job-2841",
-            client_id="cli-fernhill",
-            title="Fernhill School CCTV service visit",
-            status="invoiced",
-            address="Fernhill Rd, Leeds",
-            amount=480.0,
-            notes=["INV-2841 raised", "30 days past due"],
-        ),
-        Job(
-            id="job-2790",
-            client_id="cli-quayside",
-            title="Quayside Bistro camera clean + recable",
-            status="invoiced",
-            address="Quayside Wharf",
-            amount=210.0,
-            notes=["INV-2790", "14 days past due", "Prior email bounced"],
-        ),
-        Job(
-            id="job-oak",
-            client_id="cli-elm",
-            title="Elm Court flats realign + HDD swap",
-            status="complete",
-            address="Elm Court",
-            amount=322.5,
-            notes=["Labour 3.5h @ £65 + parts £95", "Ready to raise invoice"],
-        ),
-        Job(
-            id="job-ash",
-            client_id="cli-birchlea",
-            title="Birch Lea lobby camera call-out",
-            status="scheduled",
-            address="Birch Lea Care Home",
-            amount=None,
-            notes=["Slot before install crew"],
-        ),
-        Job(
-            id="job-metro",
-            client_id="cli-northgate",
-            title="Unit 12 warehouse — 4x IP + NVR quote",
-            status="quoting",
-            address="Unit 12, Northgate Logistics",
-            amount=None,
-            notes=["4 outdoor IP + 8ch NVR"],
-        ),
-        Job(
-            id="job-larch",
-            client_id="cli-larch",
-            title="Larch workshop NVR commissioning",
-            status="open",
-            address="Larch workshop bay",
-            amount=890.0,
-            notes=["Deposit received", "Final commissioning chase pending", "Balance INV-Q-118"],
-        ),
-        Job(
-            id="job-larch-access",
-            client_id="cli-larch",
-            title="Larch workshop access reader install",
-            status="closed",
-            address="Larch workshop bay — side door",
-            amount=320.0,
-            notes=["Completed last month", "Paid — closed chase ch-007"],
-        ),
+        Job(id="job-507", client_id="cli-lark", title="Larkfield smoke alarm swap (+7 more invoices)",
+            status="invoiced", address="18 Armley Lane, Leeds", amount=462.0,
+            notes=["INV-1007–INV-1014 unpaid, £2,166 total", "Chases to accounts@ bounced 3x"]),
+        Job(id="job-514", client_id="cli-lark", title="Larkfield landlord EICR remedials",
+            status="invoiced", address="22 Moortown Crescent, Leeds", amount=174.0,
+            notes=["INV-1014 £174 due 24 Oct"]),
+        Job(id="job-520", client_id="cli-brin", title="Brindle & Oak kitchen circuits + oven supply",
+            status="invoiced", address="Brindle & Oak, 12 Call Lane, Leeds", amount=2940.0,
+            notes=["INV-1020 £2,940 due 14 Sep", "Two WhatsApp promises missed"]),
+        Job(id="job-522", client_id="cli-kest", title="Kestrel gate access + yard floodlights",
+            status="invoiced", address="Kestrel Self Storage, Unit 4 Stourton Ind Est, Leeds", amount=2160.0,
+            notes=["INV-1043 £2,160", "Possible receipt BL-0078 ref 7781 from KSS OPERATIONS LTD"]),
+        Job(id="job-518", client_id="cli-moss", title="Mosswood sports hall LED upgrade",
+            status="invoiced", address="Mosswood Academy, Stonegate Lane, Leeds", amount=8220.0,
+            notes=["INV-1018 rejected by AP portal: no PO", "Job carries PO-MAT-77412"]),
+        Job(id="job-515", client_id="cli-copp", title="Copperbeech Chapeltown practice full rewire",
+            status="invoiced", address="Copperbeech Dental, 88 Harehills Road, Leeds", amount=18400.0,
+            notes=["INV-1015 £18,400; £9,200 stage payment received", "Snag closed JS-216 on 2 Oct"]),
+        Job(id="job-519", client_id="cli-moss", title="Mosswood PAT testing, main block",
+            status="closed", address="Mosswood Academy, Stonegate Lane, Leeds", amount=1128.0,
+            notes=["INV-1019 paid with PO-MAT-76980 — closed chase ch-007"]),
     ]
 
     chases = [
-        Chase(
-            id="ch-001",
-            client_id="cli-fernhill",
-            job_id="job-2841",
-            invoice_ref="INV-2841",
-            amount=480.0,
-            days_overdue=30,
-            status="open",
-            summary="Fernhill School INV-2841 £480 — 30 days past due",
-            last_action="Accounts reminder logged",
-            history=[
-                f"{(NOW - timedelta(days=30)).date().isoformat()}: INV-2841 issued",
-                f"{(NOW - timedelta(days=14)).date().isoformat()}: polite reminder emailed",
-                f"{(NOW - timedelta(days=3)).date().isoformat()}: finance said 'with accounts'",
-            ],
-        ),
-        Chase(
-            id="ch-002",
-            client_id="cli-quayside",
-            job_id="job-2790",
-            invoice_ref="INV-2790",
-            amount=210.0,
-            days_overdue=14,
-            status="open",
-            summary="Quayside Bistro INV-2790 £210 — 14 days past due; prior email bounced",
-            last_action="Bounce noted — try accounts@",
-            history=[
-                f"{(NOW - timedelta(days=14)).date().isoformat()}: INV-2790 issued",
-                f"{(NOW - timedelta(days=7)).date().isoformat()}: chase to owner@ bounced",
-                f"{(NOW - timedelta(days=1)).date().isoformat()}: switched target to accounts@",
-            ],
-        ),
-        Chase(
-            id="ch-003",
-            client_id="cli-elm",
-            job_id="job-oak",
-            invoice_ref="INV-next",
-            amount=322.5,
-            days_overdue=0,
-            status="open",
-            summary="Elm Court job complete — raise & send invoice £322.50",
-            last_action="Site signed off",
-            history=[
-                f"{(NOW - timedelta(days=2)).date().isoformat()}: labour + HDD swap complete",
-                f"{(NOW - timedelta(days=1)).date().isoformat()}: site signed off — ready to invoice",
-            ],
-        ),
-        Chase(
-            id="ch-004",
-            client_id="cli-birchlea",
-            job_id="job-ash",
-            invoice_ref="",
-            amount=None,
-            days_overdue=0,
-            status="open",
-            summary="Birch Lea lobby camera offline — confirm tomorrow AM slot",
-            last_action="Call-out requested",
-            history=[
-                f"{(NOW - timedelta(hours=18)).isoformat()}: manager reported lobby cam 2 offline",
-                f"{(NOW - timedelta(hours=6)).isoformat()}: offered tomorrow AM before install crew",
-            ],
-        ),
-        Chase(
-            id="ch-005",
-            client_id="cli-northgate",
-            job_id="job-metro",
-            invoice_ref="",
-            amount=None,
-            days_overdue=0,
-            status="waiting",
-            summary="Northgate Logistics quote request — ballpark due this week",
-            last_action="Lead received",
-            history=[
-                f"{(NOW - timedelta(days=4)).date().isoformat()}: Jo asked for Hikvision ballpark",
-                f"{(NOW - timedelta(days=1)).date().isoformat()}: waiting on site photos from Jo",
-            ],
-        ),
-        Chase(
-            id="ch-006",
-            client_id="cli-larch",
-            job_id="job-larch",
-            invoice_ref="INV-Q-118",
-            amount=445.0,
-            days_overdue=7,
-            status="open",
-            summary="Larch workshop balance INV-Q-118 £445 — 7 days overdue",
-            last_action="Friendly reminder drafted last week — not sent",
-            history=[
-                f"{(NOW - timedelta(days=21)).date().isoformat()}: deposit received; NVR installed",
-                f"{(NOW - timedelta(days=7)).date().isoformat()}: INV-Q-118 balance raised £445",
-                f"{(NOW - timedelta(days=2)).date().isoformat()}: drafted friendly chase — parked for human gate",
-                f"{(NOW - timedelta(hours=2)).isoformat()}: demo thread — ask memory after restart",
-            ],
-        ),
-        # Closed chase with prior decision (reopen demo)
-        Chase(
-            id="ch-007",
-            client_id="cli-larch",
-            job_id="job-larch-access",
-            invoice_ref="INV-Q-102",
-            amount=320.0,
-            days_overdue=0,
-            status="closed",
-            summary="Larch access reader INV-Q-102 £320 — paid & closed",
-            last_action="Approved: thank-you + receipt sent",
-            decision="approve",
-            decision_note="Paid same day — closed for demo history",
-            decided_at=NOW - timedelta(days=12),
-            draft_action=(
-                "Hi Larch Workshop,\n\nThanks — INV-Q-102 £320 received. "
-                "Receipt attached.\n\nHalden & Rook / MN Labs"
-            ),
-            history=[
-                f"{(NOW - timedelta(days=20)).date().isoformat()}: access reader installed",
-                f"{(NOW - timedelta(days=15)).date().isoformat()}: INV-Q-102 issued",
-                f"{(NOW - timedelta(days=12)).date().isoformat()}: payment received — Approve thank-you",
-            ],
-        ),
+        Chase(id="ch-001", client_id="cli-lark", job_id="job-507", invoice_ref="INV-1007",
+              amount=2166.0, days_overdue=41, status="open",
+              summary="Larkfield Lettings INV-1007–INV-1014 £2,166 — 41 days past due; accounts@ bounced",
+              last_action="Third chase to accounts@ bounced (MSG-0006)",
+              history=[f"{_d(43)}: chase to accounts@ bounced (MSG-0002)",
+                       f"{_d(29)}: chase to accounts@ bounced (MSG-0004)",
+                       f"{_d(15)}: chase to accounts@ bounced (MSG-0006) — switch to finance@"]),
+        Chase(id="ch-002", client_id="cli-brin", job_id="job-520", invoice_ref="INV-1020",
+              amount=2940.0, days_overdue=38, status="open",
+              summary="Brindle & Oak INV-1020 £2,940 — 38 days past due; two broken promises",
+              last_action="Second email reminder, no reply (MSG-0013)",
+              history=[f"{_d(29)}: 'will pay Friday' (MSG-0011, by 2 Oct) — no credit",
+                       f"{_d(15)}: 'definitely this Friday' (MSG-0012, by 16 Oct) — no credit"]),
+        Chase(id="ch-003", client_id="cli-kest", job_id="job-522", invoice_ref="INV-1043",
+              amount=2160.0, days_overdue=12, status="open",
+              summary="Kestrel Self Storage INV-1043 £2,160 — check BL-0078 before chasing",
+              last_action="Asha: parent company pays (MSG-0015)",
+              history=[f"{_d(18)}: BL-0078 £2,160 ref 7781 from KSS OPERATIONS LTD",
+                       f"{_d(12)}: chase sent to site manager (MSG-0014)"]),
+        Chase(id="ch-004", client_id="cli-moss", job_id="job-518", invoice_ref="INV-1018",
+              amount=8220.0, days_overdue=21, status="open",
+              summary="Mosswood Academy INV-1018 £8,220 — rejected: no PO (job has PO-MAT-77412)",
+              last_action="AP portal rejection (MSG-0009)",
+              history=[f"{_d(44)}: rejected by trust AP portal — no PO"]),
+        Chase(id="ch-005", client_id="cli-copp", job_id="job-515", invoice_ref="INV-1015",
+              amount=9200.0, days_overdue=3, status="waiting",
+              summary="Copperbeech Dental INV-1015 balance £9,200 — held for snag, closed JS-216",
+              last_action="Simon: balance held pending snag (MSG-0008)",
+              history=[f"{_d(20)}: snag closed JS-216, photo + sign-off R. Okonjo",
+                       f"{_d(17)}: finance says balance held pending snag"]),
+        Chase(id="ch-007", client_id="cli-moss", job_id="job-519", invoice_ref="INV-1019",
+              amount=1128.0, days_overdue=0, status="closed",
+              summary="Mosswood PAT testing INV-1019 £1,128 — paid & closed",
+              last_action="Approved: thank-you + receipt sent",
+              decision="approve", decision_note="Paid with PO-MAT-76980 — closed for demo history",
+              decided_at=NOW - timedelta(days=60),
+              draft_action=f"Hi Mosswood AP,\n\nThanks — INV-1019 £1,128 received. Receipt attached.\n\n{SIGN_OFF}",
+              history=[f"{_d(68)}: INV-1019 issued with PO-MAT-76980", f"{_d(60)}: paid — Approve thank-you"]),
     ]
 
     notes = [
-        MemoryNote(
-            id="note-001",
-            text="Session seed: Halden & Rook desk + Larch demo client loaded for Open Agent hackathon.",
-            created_at=NOW - timedelta(hours=1),
-        ),
-        MemoryNote(
-            id="note-002",
-            text="Priority: Fernhill (30d) then Quayside (bounce) then Larch balance.",
-            related_client_id="cli-fernhill",
-            related_chase_id="ch-001",
-            related_job_id="job-2841",
-            created_at=NOW - timedelta(minutes=40),
-        ),
-        MemoryNote(
-            id="note-003",
-            text="Larch demo thread: after restart, ask “what were we chasing?” — should land on Fernhill or last session focus.",
-            related_client_id="cli-larch",
-            related_chase_id="ch-006",
-            related_job_id="job-larch",
-            created_at=NOW - timedelta(minutes=25),
-        ),
-        MemoryNote(
-            id="note-004",
-            text="Quayside: do not use owner@ — bounce. Prefer accounts@quaysidebistro.example.",
-            related_client_id="cli-quayside",
-            related_chase_id="ch-002",
-            related_job_id="job-2790",
-            created_at=NOW - timedelta(minutes=15),
-        ),
+        MemoryNote(id="note-001", text="Session seed: Halden & Rook Electrical desk (Leeds) loaded for Open Agent hackathon.",
+                   created_at=NOW - timedelta(hours=1)),
+        MemoryNote(id="note-002", text="Priority: Larkfield (41d, bounced) then Brindle & Oak (broken promises) then Mosswood PO.",
+                   related_client_id="cli-lark", related_chase_id="ch-001", related_job_id="job-507",
+                   created_at=NOW - timedelta(minutes=40)),
+        MemoryNote(id="note-003", text="Kestrel: do not chase until BL-0078 is checked against INV-1043.",
+                   related_client_id="cli-kest", related_chase_id="ch-003", related_job_id="job-522",
+                   created_at=NOW - timedelta(minutes=25)),
+        MemoryNote(id="note-004", text="Larkfield: do not use accounts@ — bounce. Prefer finance@larkfield-lettings.example.",
+                   related_client_id="cli-lark", related_chase_id="ch-001", related_job_id="job-507",
+                   created_at=NOW - timedelta(minutes=15)),
     ]
 
     decisions = [
-        DecisionRecord(
-            id="dec-0001",
-            chase_id="ch-007",
-            decision="approve",
-            draft_text=(
-                "Hi Larch Workshop,\n\nThanks — INV-Q-102 £320 received. "
-                "Receipt attached.\n\nHalden & Rook / MN Labs"
-            ),
-            note="Paid same day — closed for demo history",
-            at=NOW - timedelta(days=12),
-        ),
+        DecisionRecord(id="dec-0001", chase_id="ch-007", decision="approve",
+                       draft_text=f"Hi Mosswood AP,\n\nThanks — INV-1019 £1,128 received. Receipt attached.\n\n{SIGN_OFF}",
+                       note="Paid with PO-MAT-76980 — closed for demo history", at=NOW - timedelta(days=60)),
     ]
 
-    session = SessionState(
-        last_chase_id="ch-001",
-        last_client_id="cli-fernhill",
-        last_kind="chase",
-        last_question="what were we chasing?",
-        pending=None,
-    )
+    session = SessionState(last_chase_id="ch-001", last_client_id="cli-lark", last_kind="chase",
+                           last_question="what were we chasing?", pending=None)
 
     return {
-        "version": 2,
+        "version": 3,
         "updated_at": NOW.isoformat(),
         "clients": [c.model_dump(mode="json") for c in clients],
         "jobs": [j.model_dump(mode="json") for j in jobs],
@@ -309,26 +158,11 @@ def seed_payload() -> dict:
         "decisions": [d.model_dump(mode="json") for d in decisions],
         "session": session.model_dump(mode="json"),
         "activity": [
-            {
-                "id": "act-0001",
-                "action": "seeded",
-                "detail": "Loaded Halden & Rook / Larch trade memory seed (deepen v2)",
-                "at": (NOW - timedelta(hours=1)).isoformat(),
-            },
-            {
-                "id": "act-0002",
-                "action": "approved",
-                "chase_id": "ch-007",
-                "detail": "Paid same day — closed for demo history",
-                "draft_text": "Thank-you + receipt for INV-Q-102",
-                "at": (NOW - timedelta(days=12)).isoformat(),
-            },
-            {
-                "id": "act-0003",
-                "action": "note",
-                "chase_id": "ch-006",
-                "detail": "Larch demo thread primed for persistent memory story",
-                "at": (NOW - timedelta(minutes=25)).isoformat(),
-            },
+            {"id": "act-0001", "action": "seeded",
+             "detail": "Loaded Halden & Rook Electrical trade memory seed (v3, matches demo_data)",
+             "at": (NOW - timedelta(hours=1)).isoformat()},
+            {"id": "act-0002", "action": "approved", "chase_id": "ch-007",
+             "detail": "Paid with PO-MAT-76980 — closed for demo history",
+             "draft_text": "Thank-you + receipt for INV-1019", "at": (NOW - timedelta(days=60)).isoformat()},
         ],
     }

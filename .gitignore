@@ -17,3 +17,4 @@ data/*.json.tmp
 vendor/
 node_modules/
 data/hmem/
+data/outbox.jsonl

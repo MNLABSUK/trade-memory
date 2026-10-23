@@ -7,7 +7,7 @@ from typing import Any
 
 from trade_memory.models import Chase, Client, Job, ProposeResult
 
-SIGN_OFF = "Halden & Rook Ops / MN Labs desk"
+SIGN_OFF = "Tom Rook, Halden & Rook Electrical"
 
 
 def _note_text(n: Any) -> str:
@@ -126,9 +126,9 @@ def propose(
     if "quote" in text or "ballpark" in text:
         draft = (
             f"Hi {name},\n\n"
-            f"Ballpark for 4× outdoor IP + 8ch NVR (supply + install)."
+            f"Ballpark for the electrical works (supply + install)."
             f"{site_line}\n"
-            "Happy to refine once we confirm camera positions.\n\n"
+            "Happy to refine once we confirm the scope on site.\n\n"
             f"Thanks,\n{SIGN_OFF}\n"
             "(Hold for human Approve before sending.)"
             f"{mem_hint}"
@@ -142,7 +142,7 @@ def propose(
             source="dry-run",
         )
 
-    if "call-out" in text or "offline" in text or "camera" in text:
+    if "call-out" in text or "offline" in text or "fault" in text:
         draft = (
             f"Hi {name},\n\n"
             f"Confirming tomorrow morning call-out slot.{site_line}\n"

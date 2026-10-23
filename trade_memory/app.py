@@ -23,7 +23,8 @@ from trade_memory.models import (
     ProposeRequest,
     RecallRequest,
 )
-from trade_memory.nebius_client import propose_next_action
+from trade_memory.nebius_client import clean_draft, propose_next_action
+from trade_memory import why as why_mod
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "web" / "static"
 
@@ -308,6 +309,75 @@ def reset_seed():
     """Demo helper: re-seed memory (does not delete .env)."""
     store.reset_to_seed()
     return {"ok": True, "stats": store.stats()}
+
+
+# ---- Why cards: Zetaris evidence -> reasoning -> human gate (Track 02) -----------------------
+class WhyDecideRequest(BaseModel):
+    decision: str
+    action_id: str
+    note: str = ""
+    draft_text: str = ""
+
+
+@app.get("/api/why")
+def why_cards():
+    """All five cards plus outstanding totals, computed from Zetaris rows."""
+    return why_mod.engine.cards()
+
+
+@app.get("/api/why/{pid}")
+def why_card(pid: str):
+    try:
+        return why_mod.engine.card(pid.upper())
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Unknown puzzle {pid}")
+
+
+@app.post("/api/why/{pid}/decide")
+def why_decide(pid: str, req: WhyDecideRequest):
+    """The human gate: nothing is queued to send without decision=approve."""
+    try:
+        return why_mod.engine.decide(pid.upper(), req.decision, req.action_id, req.note, req.draft_text)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Unknown puzzle {pid}")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except LookupError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+
+@app.post("/api/why/{pid}/polish")
+async def why_polish(pid: str):
+    """Optional: Nemotron (via Nightshift) rewrites the draft; facts and the gate are unchanged."""
+    from trade_memory.llm import LLMUnavailable, chat_completion
+
+    try:
+        card = why_mod.engine.card(pid.upper())
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Unknown puzzle {pid}")
+    a = card["action"]
+    if not a or a["channel"] in ("ledger", "crm", "portal"):
+        return {"draft": a["draft"] if a else "", "source": "rules", "model": None}
+    msgs = [{"role": "system", "content": "Rewrite this UK trade-business message to be short, warm and firm. "
+             "Keep every invoice number, amount, date and name exactly. Reply with the message only."},
+            {"role": "user", "content": a["draft"]}]
+    try:
+        content, prov = await chat_completion(msgs)
+    except LLMUnavailable:
+        return {"draft": a["draft"], "source": "rules", "model": None}
+    import re
+
+    new = clean_draft(content)
+    facts = set(re.findall(r"INV-\d+|JS-\d+|PO-[A-Z]+-\d+|£[\d,]+(?:\.\d\d)?", a["draft"]))
+    missing = sorted(f for f in facts if f not in new)
+    if missing:  # citation check: the rewrite dropped or changed a cited fact
+        return {"draft": a["draft"], "source": "rules", "model": prov.model, "rejected_rewrite_missing": missing}
+    return {"draft": new, "source": prov.name, "model": prov.model}
+
+
+@app.get("/api/outbox")
+def outbox():
+    return {"items": why_mod.engine.outbox_items()}
 
 
 @app.get("/")

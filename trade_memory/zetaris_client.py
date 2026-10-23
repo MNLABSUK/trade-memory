@@ -106,7 +106,7 @@ class ZetarisClient:
     def _local_db(self) -> sqlite3.Connection:
         if self._db:
             return self._db
-        db = sqlite3.connect(":memory:")
+        db = sqlite3.connect(":memory:", check_same_thread=False)  # read-only, used from FastAPI threadpool
         for name, rel in LOCAL_TABLES.items():
             p = self.demo_dir / rel
             if p.suffix == ".jsonl":

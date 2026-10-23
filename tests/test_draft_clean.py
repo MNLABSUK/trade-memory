@@ -7,10 +7,10 @@ def test_strip_reasoning_nemotron():
 
 
 def test_clean_draft_preamble_and_escapes():
-    raw = 'Here are the short chase emails:\n\n**Email**\n"Hi Fernhill School,\\n\\nChase on INV-2841 for \\u00a3480.00."'
+    raw = 'Here are the short chase emails:\n\n**Email**\n"Hi Larkfield Lettings,\\n\\nChase on INV-1007 for \\u00a32,166.00."'
     out = clean_draft(raw)
     assert out.startswith("Email")
-    assert "£480.00" in out and "\\n" not in out and "\\u00a3" not in out
+    assert "£2,166.00" in out and "\\n" not in out and "\\u00a3" not in out
     assert "Here are" not in out and "**" not in out
 
 

@@ -87,9 +87,9 @@ def _dry_followup(store: MemoryStore, message: str, chase_id: str | None = None)
             "recall": recall,
         }
 
-    # draft chase for X — before who, so "draft … Oak" is not treated as who
+    # draft chase for X — before who, so "draft … Kestrel" is not treated as who
     draft_m = re.search(r"draft\s+(?:a\s+)?(?:chase|email|invoice|quote)\s+(?:for\s+)?(.+)", low)
-    if draft_m or ("draft" in low and any(x in low for x in ("oak", "fernhill", "quayside", "larch", "metro", "ash"))):
+    if draft_m or ("draft" in low and any(x in low for x in ("larkfield", "brindle", "kestrel", "mosswood", "copperbeech"))):
         client = _find_client_by_name(store, draft_m.group(1) if draft_m else msg)
         ch_obj = _open_chase_for_client(store, client.id) if client else None
         ch = ch_obj.model_dump(mode="json") if ch_obj else (recall.get("focus") or None)
@@ -102,7 +102,7 @@ def _dry_followup(store: MemoryStore, message: str, chase_id: str | None = None)
                 f"Hi {name},\n\n"
                 f"Following up on {ch.get('invoice_ref') or 'the open item'} for {amt_s}. "
                 f"{ch.get('summary') or ''}\n\n"
-                "Thanks — Halden & Rook / MN Labs\n"
+                "Thanks — Halden & Rook Electrical\n"
                 "(Human must Approve before send.)"
             )
             target_recall = store.recall(name) if client else recall
@@ -120,7 +120,7 @@ def _dry_followup(store: MemoryStore, message: str, chase_id: str | None = None)
     if "draft" not in low and (
         who_m
         or low.startswith("who is ")
-        or any(name in low for name in ("fernhill", "quayside", "larch", "oak", "Birch Lea", "metro"))
+        or any(name in low for name in ("larkfield", "brindle", "kestrel", "mosswood", "copperbeech"))
     ):
         client = _find_client_by_name(store, who_m.group(1) if who_m else msg)
         if client:

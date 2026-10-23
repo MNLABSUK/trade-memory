@@ -470,13 +470,13 @@ class MemoryStore:
                     if c.client_id == cid:
                         focus = c
                         break
-        elif "fernhill" in q:
+        elif "larkfield" in q:
             focus = self.get_chase("ch-001")
-        elif "quayside" in q:
+        elif "brindle" in q:
             focus = self.get_chase("ch-002")
-        elif "larch" in q:
-            focus = self.get_chase("ch-006")
-        elif "oak" in q:
+        elif "mosswood" in q:
+            focus = self.get_chase("ch-004")
+        elif "kestrel" in q:
             focus = self.get_chase("ch-003")
         elif overdue_q and open_chases:
             overdue = [c for c in open_chases if (c.days_overdue or 0) > 0]

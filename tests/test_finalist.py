@@ -48,7 +48,7 @@ def test_digest_get(client: TestClient):
     assert body["overdue_count"] >= 1
     assert body["total_gbp"] > 0
     assert body["top_chase_id"]
-    # Fernhill 30d should rank first
+    # Larkfield 41d should rank first
     assert body["ranked"][0]["chase_id"] == "ch-001"
 
 
@@ -64,61 +64,60 @@ def test_scrub_placeholders():
         "Contact: [Email]"
     )
     out = scrub_placeholders(
-        raw, contact="accounts@fernhill.example", client_name="Fernhill School"
+        raw, contact="finance@larkfield-lettings.example", client_name="Larkfield Lettings"
     )
     assert "[Your Name]" not in out
     assert "[Company Name]" not in out
-    assert "Halden & Rook Ops" in out
-    assert "MN Labs" in out or "Halden & Rook" in out
+    assert "Halden & Rook" in out
 
 
 def test_scrub_bracket_fields():
     out = scrub_placeholders("Signed by [Insert Name] at [Company]")
     assert "[" not in out
-    assert "Halden & Rook Ops" in out
+    assert "Halden & Rook" in out
 
 
 def test_dry_run_uses_contact():
     chase = Chase(
         id="ch-test",
-        client_id="cli-quayside",
-        invoice_ref="INV-2790",
-        amount=210.0,
+        client_id="cli-lark",
+        invoice_ref="INV-1007",
+        amount=2166.0,
         days_overdue=14,
-        summary="Quayside Bistro INV-2790 overdue",
+        summary="Larkfield Lettings INV-1007 overdue",
         last_action="Bounce noted",
-        history=["chase to owner@ bounced"],
+        history=["chase to accounts@ bounced"],
     )
     client = Client(
-        id="cli-quayside",
-        name="Quayside Bistro",
-        contact="accounts@quaysidebistro.example",
-        notes=["Previous chase bounced — try accounts@"],
+        id="cli-lark",
+        name="Larkfield Lettings",
+        contact="finance@larkfield-lettings.example",
+        notes=["accounts@ bounced — use finance@"],
     )
     job = Job(
         id="job-h",
-        client_id="cli-quayside",
-        title="Camera clean",
-        address="Quayside Wharf, Brighton",
+        client_id="cli-lark",
+        title="Smoke alarm swap",
+        address="18 Armley Lane, Leeds",
     )
     notes = [
-        type("N", (), {"text": "Quayside: do not use owner@ — bounce. Prefer accounts@quaysidebistro.example."})()
+        type("N", (), {"text": "Larkfield: do not use accounts@ — bounce. Prefer finance@larkfield-lettings.example."})()
     ]
     result = dry_run_propose(chase, client, job=job, notes=notes)
     assert result.needs_human is True
-    assert "Halden & Rook Ops" in result.draft_action
-    assert "accounts@quaysidebistro.example" in result.draft_action
+    assert "Halden & Rook" in result.draft_action
+    assert "finance@larkfield-lettings.example" in result.draft_action
     assert "[Your Name]" not in result.draft_action
     assert "[Company Name]" not in result.draft_action
-    assert "Quayside Wharf" in result.draft_action
+    assert "18 Armley Lane" in result.draft_action
 
 
 def test_propose_dry_run_no_placeholders(client: TestClient):
-    r = client.post("/api/propose", json={"chase_id": "ch-002"})
+    r = client.post("/api/propose", json={"chase_id": "ch-001"})
     assert r.status_code == 200
     draft = r.json()["proposal"]["draft_action"]
-    assert "Halden & Rook Ops" in draft
-    assert "accounts@quaysidebistro.example" in draft
+    assert "Halden & Rook" in draft
+    assert "finance@larkfield-lettings.example" in draft
     assert "[Your Name]" not in draft
     assert "[Company Name]" not in draft
 
