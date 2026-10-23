@@ -153,8 +153,15 @@ async def propose_next_action(
     contact = (client.contact if client else "") or ""
     client_name = (client.name if client else "") or chase.client_id
     try:
-        content, used = await chat_completion(messages, temperature=0.15, providers=settings["providers"])
-        parsed = _parse_json_content(content)
+        content, used = await chat_completion(
+            messages, temperature=0.15, providers=settings["providers"], json_mode=True
+        )
+        try:
+            parsed = _parse_json_content(content)
+        except ValueError:
+            # Small local models (e.g. Nightshift M1 WebLLM 1B) often answer in prose:
+            # keep their text as the draft rather than discarding a live answer.
+            parsed = {"draft_action": content.strip(), "summary": "", "urgency": "medium"}
         draft = scrub_placeholders(
             str(parsed.get("draft_action", "")).strip() or "Review and decide.",
             contact=contact,

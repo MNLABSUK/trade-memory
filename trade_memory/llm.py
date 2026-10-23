@@ -120,6 +120,7 @@ async def chat_completion(
     temperature: float = 0.15,
     providers: list[Provider] | None = None,
     transport: httpx.AsyncBaseTransport | None = None,
+    json_mode: bool = False,
 ) -> tuple[str, Provider]:
     """Try each provider in order; return (content, provider_used)."""
     providers = configured_providers() if providers is None else providers
@@ -128,6 +129,9 @@ async def chat_completion(
     errors: list[str] = []
     for p in providers:
         body = {"model": p.model, "temperature": temperature, "messages": messages}
+        if json_mode:
+            # small local models (Nightshift M1 WebLLM) drift into prose without this
+            body["response_format"] = {"type": "json_object"}
         try:
             async with httpx.AsyncClient(timeout=p.timeout, transport=transport) as http:
                 resp = await http.post(f"{p.base_url}/chat/completions", headers=p.headers(), json=body)
