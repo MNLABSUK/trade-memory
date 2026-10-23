@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trade Memory — Why desk · Halden &amp; Rook Electrical</title>
+  <link rel="stylesheet" href="/static/why.css?v=1" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <div class="logo">TM</div>
+      <div><h1>Trade Memory</h1><p>Halden &amp; Rook Electrical · Leeds · credit-control desk</p></div>
+    </div>
+    <div class="chips">
+      <span id="modeChip" class="chip">Zetaris: …</span>
+      <span class="chip gate">Human gate on · nothing sends itself</span>
+      <a class="chip link" href="/classic">Classic desk</a>
+    </div>
+  </header>
+
+  <section class="totals">
+    <div class="big"><span class="label">Showing unpaid</span><span id="totalOut" class="value">£—</span>
+      <span class="sub" id="totalSub">across — invoices</span></div>
+    <div id="byClient" class="byclient"></div>
+  </section>
+
+  <main class="layout">
+    <nav id="caseList" class="cases" aria-label="Cases"></nav>
+    <section id="card" class="card"><p class="muted">Loading Why cards…</p></section>
+    <aside class="outbox">
+      <h3>Outbox <span class="muted">(approved, for Tom to send)</span></h3>
+      <div id="outbox"></div>
+    </aside>
+  </main>
+  <div id="toast" class="toast hidden"></div>
+  <script src="/static/why.js?v=1"></script>
+</body>
+</html>

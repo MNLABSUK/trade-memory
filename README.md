@@ -123,3 +123,13 @@ pytest -q
 ## License
 
 MIT — see `LICENSE`.
+
+## Why desk (main screen, `/`)
+
+Every proposed action is a **Why card** built from Zetaris rows (`trade_memory/why.py`):
+evidence rows (table + row id), reasoning steps, a confidence score, the H-MEM memories used,
+and the exact federated SQL that ran. Nothing is sent: **Approve** only queues the item in
+`data/outbox.jsonl` for Tom to send; **Reject** is stored in H-MEM (`case:P#`) and the next
+proposal changes (alternative action, lower confidence). API: `GET /api/why`, `GET /api/why/{P1..P5}`,
+`POST /api/why/{pid}/decide`, `POST /api/why/{pid}/polish` (optional LLM rewrite, citation-checked),
+`GET /api/outbox`. The old desk is at `/classic`. Screens: `docs/screens/`.

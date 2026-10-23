@@ -208,12 +208,12 @@ def _p5(c) -> tuple[dict, dict]:
                channel=ct["preferred_channel"], notes=ct["notes"])]
     ev += [_row("tm_files.inbox", m["message_id"], at=zc._s(m["timestamp"])[:10], promise=m["promise"])
            for m in r["broken_promises"]]
-    ev.append(_row("tm_files.bank_lines", "(none)", matching_credit=f"no credit of {_gbp(inv['total_gbp'])} since first promise"))
+    ev.append(_row("tm_files.bank_lines", "no match", matching_credit=f"no credit of {_gbp(inv['total_gbp'])} since first promise"))
     steps = [f"{inv['invoice_id']} ({_gbp(inv['total_gbp'])}) is unpaid.",
              f"{len(r['broken_promises'])} WhatsApp promises passed: "
              + "; ".join(f"{m['message_id']} '{m['promise']}'" for m in r["broken_promises"]) + ".",
              f"No matching credit in the bank feed after the first promise.",
-             f"CRM: {ct['name']} {ct['notes'].lower()} Two more emails would be ignored — phone."]
+             f"CRM: {ct['name']} {ct['notes'].lower().rstrip('.')}. Two more emails would be ignored — phone."]
     acts = {
         "phone": dict(title=f"Phone {ct['name']} today ({ct['phone']})", channel="phone", to=ct["phone"],
                       confidence=0.86, next=None, alt="final",

@@ -382,6 +382,15 @@ def outbox():
 
 @app.get("/")
 def index():
+    """Main screen: the Why desk (Zetaris evidence + human gate)."""
+    path = STATIC_DIR / "why.html"
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="UI not found")
+    return FileResponse(path)
+
+
+@app.get("/classic")
+def classic():
     index_path = STATIC_DIR / "index.html"
     if not index_path.exists():
         raise HTTPException(status_code=404, detail="UI not found")
