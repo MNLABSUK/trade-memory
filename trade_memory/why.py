@@ -10,6 +10,7 @@ to the alternative action (with lower confidence). Nothing is ever sent automati
 from __future__ import annotations
 
 import json
+import re
 import time
 from pathlib import Path
 from typing import Any, Callable
@@ -34,10 +35,24 @@ class RecordingClient:
 
     def query(self, sql: str, limit: int = 1000) -> list[dict]:
         t = time.time()
-        rows = self.inner.query(sql, limit)
+        rows = [_norm(r) for r in self.inner.query(sql, limit)]
         self.queries.append({"sql": " ".join(sql.split()), "rows": len(rows),
                              "ms": round((time.time() - t) * 1000), "mode": self.inner.mode})
         return rows
+
+
+_NUM = re.compile(r"^-?\d+(\.\d+)?$")
+
+
+def _norm(row: dict) -> dict:
+    """Live Zetaris returns DECIMALs as strings; offline SQLite returns floats. Make money numeric."""
+    out = {}
+    for k, v in row.items():
+        k = k.split(".")[-1].lower() if isinstance(k, str) else k
+        if isinstance(v, str) and ("gbp" in k or "amount" in k) and _NUM.match(v.strip()):
+            v = float(v)
+        out[k] = v
+    return out
 
 
 def _gbp(v: float) -> str:

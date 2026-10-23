@@ -98,8 +98,8 @@ async function boot() {
     cards = d.cards; renderTotals(d.totals);
     const mode = cards[0]?.data_mode || "offline";
     const chip = $("#modeChip");
-    chip.textContent = mode === "live" ? "Zetaris: live federated" : "Zetaris: offline replica (same SQL over demo_data)";
-    chip.classList.add(mode === "live" ? "live" : "offline");
+    chip.textContent = mode !== "offline" ? "Zetaris: LIVE federated (ops_db + files)" : "Zetaris: offline replica (same SQL over demo_data)";
+    chip.classList.add(mode !== "offline" ? "live" : "offline");
     renderList(); renderCard(); loadOutbox();
   } catch (e) { $("#card").innerHTML = `<p>Could not load: ${esc(e.message)}</p>`; }
 }
