@@ -21,12 +21,16 @@ MEMORY_PATH = DATA_DIR / "memory.json"
 
 @lru_cache
 def get_settings() -> dict:
-    api_key = (os.getenv("NEBIUS_API_KEY") or "").strip()
-    model = (os.getenv("NEBIUS_MODEL") or "").strip() or DEFAULT_MODEL
+    """Primary provider first (Nightshift), then Nebius; dry-run when none."""
+    from trade_memory.llm import configured_providers
+
+    providers = configured_providers()
+    primary = providers[0] if providers else None
     return {
-        "api_key": api_key,
-        "base_url": (os.getenv("NEBIUS_BASE_URL") or DEFAULT_BASE_URL).rstrip("/"),
-        "model": model,
-        "dry_run": not bool(api_key),
+        "providers": providers,
+        "provider": primary.name if primary else "dry-run",
+        "base_url": primary.base_url if primary else "",
+        "model": primary.model if primary else ((os.getenv("NIGHTSHIFT_MODEL") or "").strip() or "dry-run"),
+        "dry_run": primary is None,
         "memory_path": str(MEMORY_PATH),
     }

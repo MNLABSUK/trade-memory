@@ -16,3 +16,4 @@ data/*.json.tmp
 .notebook/
 vendor/
 node_modules/
+data/hmem/

@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from trade_memory import __version__
 from trade_memory.config import get_settings
 from trade_memory.followup import handle_followup
+from trade_memory.hmem import hmem
 from trade_memory.memory import store
 from trade_memory.models import (
     DecideRequest,
@@ -41,7 +42,7 @@ def health() -> HealthResponse:
         status="ok",
         dry_run=s["dry_run"],
         model=s["model"],
-        provider="dry-run" if s["dry_run"] else "nebius-token-factory",
+        provider=s["provider"],
         memory_path=s["memory_path"],
         clients=st["clients"],
         jobs=st["jobs"],
@@ -203,6 +204,11 @@ async def propose(req: ProposeRequest):
 
     ctx = store.build_propose_context(chase)
     client = ctx["client"]
+    # Meterless H-MEM: inject durable memories for this client into the prompt.
+    hq = " ".join(filter(None, [client.name if client else chase.client_id, chase.invoice_ref, chase.summary]))
+    hmem_summary = hmem.summary(hq, namespace=f"client:{chase.client_id}")
+    if hmem_summary:
+        ctx["recall_summary"] = (ctx["recall_summary"] + "\n" + hmem_summary).strip()
     result = await propose_next_action(
         chase,
         client,
@@ -258,6 +264,23 @@ def decide(req: DecideRequest):
     )
     if chase is None:
         raise HTTPException(status_code=404, detail=f"Chase not found: {req.chase_id}")
+    # Meterless H-MEM: every human gate decision becomes a sourced, durable memory.
+    parts = [f"{req.decision} on {chase.invoice_ref or chase.id}"]
+    if req.note:
+        parts.append(f"note: {req.note}")
+    if draft and req.decision == "approve":
+        parts.append(f"sent: {draft[:200]}")
+    hmem.remember(
+        "; ".join(parts),
+        source=f"decision:{chase.id}",
+        confidence=0.95 if req.note else 0.8,
+        origin="decision",
+        label="human gate decision",
+        namespace=f"client:{chase.client_id}",
+        tags=[req.decision, chase.invoice_ref] if chase.invoice_ref else [req.decision],
+        entities=[{"name": chase.client_id, "type": "client"}],
+        refs={"decisionId": chase.id},
+    )
     return {"chase": chase.model_dump(mode="json"), "session": store.get_session()}
 
 

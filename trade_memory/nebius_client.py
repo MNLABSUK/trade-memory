@@ -9,6 +9,7 @@ from typing import Any
 import httpx
 
 from trade_memory.config import get_settings
+from trade_memory.llm import chat_completion
 from trade_memory.dry_run import propose as dry_run_propose
 from trade_memory.models import Chase, Client, Job, ProposeResult
 
@@ -145,27 +146,14 @@ async def propose_next_action(
         return dry_run_propose(chase, client, **ctx_kw)
 
     user_payload = _serialize_context(chase, client, **ctx_kw)
-    url = f"{settings['base_url']}/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {settings['api_key']}",
-        "Content-Type": "application/json",
-    }
-    body = {
-        "model": settings["model"],
-        "temperature": 0.15,
-        "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": json.dumps(user_payload)},
-        ],
-    }
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": json.dumps(user_payload)},
+    ]
     contact = (client.contact if client else "") or ""
     client_name = (client.name if client else "") or chase.client_id
     try:
-        async with httpx.AsyncClient(timeout=60.0) as client_http:
-            resp = await client_http.post(url, headers=headers, json=body)
-            resp.raise_for_status()
-            data = resp.json()
-        content = data["choices"][0]["message"]["content"]
+        content, used = await chat_completion(messages, temperature=0.15, providers=settings["providers"])
         parsed = _parse_json_content(content)
         draft = scrub_placeholders(
             str(parsed.get("draft_action", "")).strip() or "Review and decide.",
@@ -183,7 +171,7 @@ async def propose_next_action(
             draft_action=draft,
             urgency=str(parsed.get("urgency", "medium")),
             needs_human=True,
-            source="nebius",
+            source=used.name,
         )
     except Exception:
         fallback = dry_run_propose(chase, client, **ctx_kw)
