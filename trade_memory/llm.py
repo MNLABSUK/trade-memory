@@ -97,6 +97,12 @@ def configured_providers() -> list[Provider]:
                 },
             )
         )
+        fb_model = _env("NIGHTSHIFT_FALLBACK_MODEL")
+        if fb_model and fb_model != out[-1].model:
+            # e.g. a local WebLLM model when the Nightshift cloud lane fails
+            p0 = out[-1]
+            out.append(Provider(name="nightshift", base_url=p0.base_url, api_key=p0.api_key,
+                                model=fb_model, timeout=p0.timeout, extra_headers=dict(p0.extra_headers)))
     nb_key = _env("NEBIUS_API_KEY")
     if nb_key:
         out.append(

@@ -84,12 +84,50 @@ def scrub_placeholders(
     return out.strip()
 
 
+_THINK_RE = re.compile(r"^.*?</think>\s*", re.S)
+_PREAMBLE_RE = re.compile(r"^\s*(here (is|are)|sure[,!]|certainly|okay|ok,)\b[^\n]*\n+", re.I)
+
+
+def strip_reasoning(content: str) -> str:
+    """Drop a leading reasoning block (Nemotron emits '...</think>' in content)."""
+    content = content or ""
+    if "</think>" in content:
+        content = _THINK_RE.sub("", content, count=1)
+    return re.sub(r"<think>.*?(</think>|$)", "", content, flags=re.S).strip()
+
+
+def _unescape(text: str) -> str:
+    if "\\n" in text or "\\u" in text or '\\"' in text:
+        text = re.sub(r"\\u([0-9a-fA-F]{4})", lambda m: chr(int(m.group(1), 16)), text)
+        text = text.replace("\\n", "\n").replace("\\t", "\t").replace('\\"', '"')
+    return text
+
+
+def clean_draft(text: str) -> str:
+    """Make a model draft human-ready: no reasoning, preamble, markdown fences, quotes or escapes."""
+    t = strip_reasoning(str(text or ""))
+    t = _PREAMBLE_RE.sub("", t, count=1)
+    t = re.sub(r"^```[a-zA-Z]*\s*$", "", t, flags=re.M)
+    t = re.sub(r"\*\*([^*\n]+)\*\*", r"\1", t)
+    t = _unescape(t)
+    lines = [ln.strip().strip('"').rstrip() if ln.strip().startswith('"') or ln.strip().endswith('"') else ln.rstrip() for ln in t.splitlines()]
+    t = "\n".join(lines)
+    t = re.sub(r"\n{3,}", "\n\n", t)
+    return t.strip()
+
+
 def _parse_json_content(content: str) -> dict[str, Any]:
-    content = content.strip()
+    content = strip_reasoning(content)
     if content.startswith("```"):
         content = re.sub(r"^```(?:json)?\s*", "", content)
         content = re.sub(r"\s*```$", "", content)
-    return json.loads(content)
+    try:
+        return json.loads(content)
+    except ValueError:
+        start, end = content.find("{"), content.rfind("}")
+        if start != -1 and end > start:
+            return json.loads(content[start : end + 1])
+        raise
 
 
 def _serialize_context(
@@ -161,14 +199,14 @@ async def propose_next_action(
         except ValueError:
             # Small local models (e.g. Nightshift M1 WebLLM 1B) often answer in prose:
             # keep their text as the draft rather than discarding a live answer.
-            parsed = {"draft_action": content.strip(), "summary": "", "urgency": "medium"}
+            parsed = {"draft_action": content, "summary": "", "urgency": "medium"}
         draft = scrub_placeholders(
-            str(parsed.get("draft_action", "")).strip() or "Review and decide.",
+            clean_draft(parsed.get("draft_action", "")) or "Review and decide.",
             contact=contact,
             client_name=client_name,
         )
         summary = scrub_placeholders(
-            str(parsed.get("summary", "")).strip() or "Proposed by Nemotron.",
+            clean_draft(parsed.get("summary", "")) or "Proposed by Nemotron.",
             contact=contact,
             client_name=client_name,
         )
