@@ -5,7 +5,9 @@ Demo business: *Halden & Rook Electrical*, Leeds. This is a fictional company, a
 
 Small contractors keep their money trail in four places: the job/invoice system, the bank feed, the CRM and WhatsApp/email. Trade Memory asks all four through **one federated SQL layer (Zetaris)**. Each next action comes as a **Why card** with its working. The card cites the exact rows, steps through the reasoning, gives a confidence score and lists the memories it used. **Nothing is sent until a person clicks Approve.** Every approval or rejection is stored in **H-MEM**, so the next proposal changes.
 
-Open Agent Hackathon 2026. Track 02: Real-World Industry Agents.
+Open Agent Hackathon 2026. Track 03: Reasoning Architecture.
+
+**Model:** NVIDIA Nemotron 3 Ultra 550B via Meterless Nightshift (local Qwen 2.5 3B fallback, then Nebius).
 
 ![Why desk, live Zetaris](docs/screens/06-why-desk-live-zetaris.png)
 
@@ -41,7 +43,7 @@ flowchart LR
   UI -- Approve / Reject + note --> GATE{Human gate}
   GATE -- approve --> OUT[outbox.jsonl<br/>queued for Tom, never auto-sent]
   GATE -- decision memory --> HMEM
-  UI -. Polish wording .-> LLM[Meterless Nightshift →<br/>NVIDIA Nemotron]
+  UI -. Polish wording .-> LLM[Meterless Nightshift →<br/>NVIDIA Nemotron 3 Ultra 550B]
   LLM -. citation check: every INV/PO/£ kept .-> UI
 ```
 
@@ -56,7 +58,7 @@ flowchart LR
 | **Zetaris** | Federated SQL across Postgres (`tm_ops`) and file sources (`tm_files`). Every card shows the exact queries, row counts and timings | `trade_memory/zetaris_client.py`, `trade_memory/why.py` |
 | **Meterless Nightshift** | OpenAI-compatible runtime, tried first for all LLM calls (with a fallback model lane) | `trade_memory/llm.py` |
 | **Meterless H-MEM** | Layered memory with provenance: approval/rejection decisions per case, client facts citing their source rows | `trade_memory/hmem.py` |
-| **NVIDIA Nemotron** | Draft wording and the classic desk's propose flow, served through Nightshift (Nebius Token Factory as fallback) | `trade_memory/llm.py`, `trade_memory/nebius_client.py` |
+| **NVIDIA Nemotron 3 Ultra 550B** | Draft wording and the classic desk's propose flow, served through Meterless Nightshift (local Qwen 2.5 3B fallback, then Nebius Token Factory) | `trade_memory/llm.py`, `trade_memory/nebius_client.py` |
 
 ## Setup
 
