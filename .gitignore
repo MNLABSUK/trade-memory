@@ -18,3 +18,4 @@ vendor/
 node_modules/
 data/hmem/
 data/outbox.jsonl
+OPEN-AGENT-PLAN-2026-10.md
