@@ -1,135 +1,121 @@
 # Trade Memory
 
-**Persistent chase memory** for small UK trades / contractors (fictional Halden & Rook Electrical Ltd, Leeds — see `demo_data/`).
+**A credit-control agent for small UK trade businesses that shows its working.**
+Demo business: *Halden & Rook Electrical*, Leeds. This is a fictional company, and every client, person, address and email in `demo_data/` is made up.
 
-Primary track: **Real-World Industry Agents** (Open Agent Hackathon 2026 / GenAI.Works).  
-Secondary narrative: **Persistent Memory Agents**.
+Small contractors keep their money trail in four places: the job/invoice system, the bank feed, the CRM and WhatsApp/email. Trade Memory asks all four through **one federated SQL layer (Zetaris)**. Each next action comes as a **Why card** with its working. The card cites the exact rows, steps through the reasoning, gives a confidence score and lists the memories it used. **Nothing is sent until a person clicks Approve.** Every approval or rejection is stored in **H-MEM**, so the next proposal changes.
 
-> Small contractors lose context between WhatsApp, emails, and open invoices.  
-> Trade Memory remembers jobs, clients, and chase state **across sessions**, proposes real next actions, and always stops at a **human gate** (Approve / Leave it / Later).
+Open Agent Hackathon 2026. Track 02: Real-World Industry Agents.
 
-This is **not** a Desk Gate clone. Desk Gate is an inbox triage desk; Trade Memory’s star is the **persistent JSON memory store** (clients · jobs · chases · notes · decisions) that survives process restart.
+![Why desk, live Zetaris](docs/screens/06-why-desk-live-zetaris.png)
 
-## Finalist (v0.3)
+## The five puzzles in the demo data
 
-- **Agent drafts** — Halden & Rook Electrical sign-off; real `client.contact` + job address; bounce-aware preferred contact; placeholder scrub; temp 0.15
-- **Morning digest** — `GET/POST /api/digest` ranks overdue £, suggested work order, one-line memory recall; UI chip selects top chase
-- **Visual polish** — Desk Gate cream/navy DNA on 3-col desk (sticky blur topbar, paper cards, urgency pills, Approve-primary decide bar, elevated follow-up, toast)
-- **Failure modes** — topbar drawer + README section (submission req 6.3)
-- **Approved this session** strip — surfaces last Approve draft from decisions
-- **Microcopy** — “Remembers the chase. You approve the send.” + 3-step empty state
+| # | Client | What a naive chaser would do | What the evidence shows | Card proposes |
+|---|---|---|---|---|
+| P1 | Kestrel Self Storage | Chase INV-1043 (£2,160) | Bank line BL-0078 came from the parent company KSS Ops, using its own reference (CRM C-010) | Allocate the receipt. Don't chase |
+| P2 | Larkfield Lettings | Re-send to accounts@ | Three bounces (MSG-0002/4/6). AP has moved to finance@ (C-002) | Re-send INV-1007…1014 to finance@ |
+| P3 | Copperbeech Dental | Chase £9,200 hard | Snag JS-216 is closed on site, and finance is waiting for sign-off | Send the snag sign-off and ask for the balance |
+| P4 | Mosswood Academy Trust | Chase INV-1018 (£8,220) | Rejected for a missing PO. Job JOB-518 carries PO-MAT-77412 | Reissue with the PO through the portal |
+| P5 | Brindle & Oak Cafés | Email again | Two broken promises (MSG-0011/12), and he pays when phoned | Phone today. If rejected → WhatsApp final notice |
 
-## Deepen features (v0.2)
+£24,686 shows as unpaid in total, worked out from `tm_ops.invoices`. The cards explain why less than that is really owed.
 
-- **Richer propose context** — related job, recent notes, prior decisions, recall summary fed into Nebius / dry-run
-- **Broad recall** — substring search across clients, jobs, chases, notes, invoice refs; returns matched_* + focus
-- **Chase lifecycle** — reopen closed/later chases; optional `snooze_until` on Later; activity filter by chase
-- **Follow-up chat** — `/api/followup` for “what’s overdue?”, “who is Larkfield?”, “draft chase for Kestrel”
-- **Activity stats** — `decisions_today`, `later_count` on `/api/activity` + health
-- **3-column cream/navy desk** — Memory | Chases | Detail+Activity, follow-up bar, demo chips, Esc clears selection
-- **Seed v2** — chase history strings, closed Mosswood chase with prior decision, demo memory thread
+## Architecture
 
-## Quick start
+```mermaid
+flowchart LR
+  subgraph Sources["Business data (fictional)"]
+    OPS[(ops_db: Postgres<br/>jobs · invoices · job_sheets)]
+    FILES[(files: CSV/JSON<br/>bank_lines · contacts · inbox)]
+  end
+  subgraph Z["Zetaris Lightning"]
+    FED[Federated SQL<br/>tm_ops.* ⨝ tm_files.*]
+  end
+  OPS --> FED
+  FILES --> FED
+  FED -- REST :3000 via SSH tunnel --> ZC[zetaris_client.py<br/>live → offline SQLite fallback]
+  ZC --> WHY[why.py WhyEngine<br/>evidence · steps · confidence]
+  HMEM[(Meterless H-MEM<br/>case:P# decisions<br/>client:* facts)] <--> WHY
+  WHY --> UI[Why desk UI :43151]
+  UI -- Approve / Reject + note --> GATE{Human gate}
+  GATE -- approve --> OUT[outbox.jsonl<br/>queued for Tom, never auto-sent]
+  GATE -- decision memory --> HMEM
+  UI -. Polish wording .-> LLM[Meterless Nightshift →<br/>NVIDIA Nemotron]
+  LLM -. citation check: every INV/PO/£ kept .-> UI
+```
+
+- **Deterministic core.** Card facts, actions and confidence come from SQL rows and rules, never from an LLM. That keeps them reproducible and testable.
+- **The LLM is optional and checked.** "Polish wording" rewrites a draft with Nemotron. The rewrite is thrown away if it drops or changes any invoice number, PO or £ amount.
+- **Memory changes behaviour.** Approve moves the case to its next step. Reject switches to the alternative action, multiplies confidence by 0.9 and cites the rejection memory on the card.
+
+## Sponsor tech
+
+| Sponsor | Used for | Where |
+|---|---|---|
+| **Zetaris** | Federated SQL across Postgres (`tm_ops`) and file sources (`tm_files`). Every card shows the exact queries, row counts and timings | `trade_memory/zetaris_client.py`, `trade_memory/why.py` |
+| **Meterless Nightshift** | OpenAI-compatible runtime, tried first for all LLM calls (with a fallback model lane) | `trade_memory/llm.py` |
+| **Meterless H-MEM** | Layered memory with provenance: approval/rejection decisions per case, client facts citing their source rows | `trade_memory/hmem.py` |
+| **NVIDIA Nemotron** | Draft wording and the classic desk's propose flow, served through Nightshift (Nebius Token Factory as fallback) | `trade_memory/llm.py`, `trade_memory/nebius_client.py` |
+
+## Setup
 
 ```bash
-cd trade-memory
-python3 -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+git clone <this repo> && cd trade-memory
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-
-# Optional: copy Nebius key from Desk Gate for live mode
-# cp ../Nebius-NVIDIA/desk-gate/.env .env   # if present — never commit
-
-# macOS double-click launcher:
-open start-trade-memory.command
-
-# Or manually:
-export PYTHONPATH=.
+cp .env.example .env          # fill in locally; .env is gitignored
+pytest -q                     # hermetic: dry-run LLM, temp H-MEM, offline Zetaris
 uvicorn trade_memory.app:app --host 127.0.0.1 --port 43151
 ```
 
-- UI: http://127.0.0.1:43151/
-- Health: http://127.0.0.1:43151/api/health
+Open http://127.0.0.1:43151/ for the Why desk. The original desk is at `/classic`.
 
-Without `NEBIUS_API_KEY`, the app runs in **dry-run** (deterministic heuristics). With a key, it uses Nebius Token Factory.
+**Zetaris live mode.** The Zetaris server's API (:3000) and Thrift (:10000) listen only on its localhost. Reach them over SSH:
 
-## Demo walkthrough (~2 minutes)
+```bash
+# .env: ZETARIS_SSH_HOST=<server>, ZETARIS_USER / ZETARIS_PASSWORD = Zetaris login
+scripts/tunnel.sh install     # macOS launchd agent: starts at login, restarts if it drops
+scripts/tunnel.sh status      # or: start | stop | uninstall
+```
 
-1. Open http://127.0.0.1:43151/ — stats strip shows overdue £, open, later, notes, clients.
-2. Click **Morning digest** — ranked overdue + £ total; top chase selected; recall filled.
-3. Or ask **What were we chasing?** — recall focuses Larkfield; center list highlights the chase.
-4. Click **Propose next** — draft appears with job address / contact context (dry-run or Nebius).
-5. Edit draft → **Later** (or Approve / Leave it) — activity trail updates; chase moves to Closed/Later.
-6. Restart the server → ask recall again — same focus / notes prove **persistence**. Try follow-up: “who’s Mosswood?” / “draft chase for Kestrel” / **Reopen** on a closed chase.
+Without the tunnel or credentials, the client falls back to **offline mode**. It runs the same SQL against an in-memory SQLite copy of `demo_data/`, and the header says which mode is in use.
 
-## What persists
-
-File: `data/memory.json` (gitignored at runtime)
-
-| Entity | Purpose |
-|--------|---------|
-| clients | Who you work for + contact notes |
-| jobs | Field / install work + address |
-| chases | Open invoices & follow-ups (+ history, snooze) |
-| notes | Free-form memory (optional job/chase/client link) |
-| decisions | Approve / Leave / Later audit |
-| session | Last chase + pending draft — continues after restart |
-| activity | Desk trail for the Activity pane |
+**LLM.** Set `NIGHTSHIFT_BASE_URL` / `NIGHTSHIFT_MODEL` (or `NEBIUS_*`). With neither set, the app runs in dry-run and every card still works.
 
 ## API
 
 | Method | Path | Purpose |
-|--------|------|---------|
-| GET | `/api/health` | ok + dry_run + counts + later_count + decisions_today |
-| GET | `/api/memory` | Full memory snapshot |
-| GET/POST | `/api/recall` | Broad “what were we chasing?” search |
-| POST | `/api/notes` | Add persistent note |
-| GET | `/api/chases` | List chases (`open_only`) |
-| GET | `/api/jobs` | List jobs |
-| GET | `/api/clients/{id}` | Client + jobs + chases + notes |
-| POST | `/api/propose` | LLM / dry-run next action (full memory context) |
-| POST | `/api/decide` | approve \| leave \| later (+ optional snooze_until) |
-| POST | `/api/chases/{id}/reopen` | Reopen closed/later chase |
-| POST | `/api/followup` | Desk chat (overdue / who / draft) |
-| GET | `/api/activity` | Activity feed + stats |
-| POST | `/api/reset-seed` | Re-seed demo memory |
-
-## Tests
-
-```bash
-pytest -q
-```
-
-## Ports
-
-| App | Port |
-|-----|------|
-| Desk Gate | 43149 |
-| Yard Desk | 43150 |
-| **Trade Memory** | **43151** |
-
-
+|---|---|---|
+| GET | `/api/why` | All five Why cards and outstanding totals |
+| GET | `/api/why/{P1..P5}` | One card (evidence, reasoning, confidence, memories, queries, action) |
+| POST | `/api/why/{pid}/decide` | `{decision: approve\|reject, action_id, note, draft_text}`. Returns 409 if the card has changed |
+| POST | `/api/why/{pid}/polish` | Optional Nemotron rewrite of the draft, citation-checked |
+| GET | `/api/outbox` | Approved items queued for a person to send |
+| GET | `/api/health` | Status, dry-run flag, counts |
+| … | `/api/recall`, `/api/propose`, `/api/decide`, `/api/digest`, `/api/followup` | Classic desk (v0.3) |
 
 ## Failure modes (honest)
 
 | Mode | What happens | Mitigation |
-|------|----------------|------------|
-| Bad / stale contacts | Owner mobiles bounce; finance emails change | Prefer `accounts@` from notes; show contact on desk |
-| LLM placeholder drafts | Nebius may emit `[Your Name]` / `[Company Name]` | SYSTEM_PROMPT + scrub → Halden & Rook + real contact; dry-run fallback |
-| Memory conflict | Concurrent sessions race on JSON flush | Last write wins; single-desk demo assumed |
-| Dry-run fallback | No API key or Nebius error | Deterministic heuristics; still needs Approve |
-| Human gate necessity | Agent must not auto-send money/invoices | `needs_human` always true; Approve / Leave / Later only |
+|---|---|---|
+| Zetaris unreachable | Tunnel down or no credentials | Offline SQLite copy runs the same SQL. Header shows "offline replica" |
+| LLM invents or drops facts | A rewrite loses an invoice number or amount | Citation check keeps the rules draft. Facts never come from the LLM |
+| Stale decision | A second tab approves an action that has already changed | `action_id` check returns 409 |
+| Wrong proposal | The rules pick the wrong channel | Reject + note goes into H-MEM. The alternative action shows with lower confidence |
+| Auto-send risk | An agent should not send money emails | No send path exists. Approve only writes to `data/outbox.jsonl` |
+
+## Pre-existing components (declaration)
+
+Trade Memory **v0.3.0** was built on 16–17 Sep 2026, before the Open Agent build window. It's committed as the baseline and tagged **`pre-window-v0.3.0`** (`6d30369`). That baseline covers the classic desk: the JSON memory store, recall, propose/decide, the digest and the cream/navy UI at `/classic`.
+
+Everything after that tag was built inside the window. You can review the diff with `git diff pre-window-v0.3.0..HEAD`. It covers:
+- fictional Halden & Rook demo data with the 5 puzzles
+- the Zetaris client and federated queries
+- the Nightshift-first LLM layer and H-MEM memory
+- Why cards, the approval gate and the outbox
+- the Why desk UI, the SSH tunnel and the tests
 
 ## License
 
-MIT — see `LICENSE`.
-
-## Why desk (main screen, `/`)
-
-Every proposed action is a **Why card** built from Zetaris rows (`trade_memory/why.py`):
-evidence rows (table + row id), reasoning steps, a confidence score, the H-MEM memories used,
-and the exact federated SQL that ran. Nothing is sent: **Approve** only queues the item in
-`data/outbox.jsonl` for Tom to send; **Reject** is stored in H-MEM (`case:P#`) and the next
-proposal changes (alternative action, lower confidence). API: `GET /api/why`, `GET /api/why/{P1..P5}`,
-`POST /api/why/{pid}/decide`, `POST /api/why/{pid}/polish` (optional LLM rewrite, citation-checked),
-`GET /api/outbox`. The old desk is at `/classic`. Screens: `docs/screens/`.
+MIT. See `LICENSE`.
