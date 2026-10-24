@@ -107,7 +107,9 @@ Without the tunnel or credentials, the client falls back to **offline mode**. It
 
 ## Pre-existing components (declaration)
 
-Trade Memory **v0.3.0** was built on 16–17 Sep 2026, before the Open Agent build window. It's committed as the baseline and tagged **`pre-window-v0.3.0`** (`6d30369`). That baseline covers the classic desk: the JSON memory store, recall, propose/decide, the digest and the cream/navy UI at `/classic`.
+Trade Memory **v0.3.0** was built on 16–17 Sep 2026, before the Open Agent build window. It's committed as the baseline and tagged **`pre-window-v0.3.0`** (`0aad730`). That baseline covers the classic desk: the JSON memory store, recall, propose/decide, the digest and the cream/navy UI at `/classic`.
+
+**Sanitised baseline.** Before publishing, the baseline commit was sanitised. Real client and person names were replaced with fictional ones, contact emails were anonymised and a private planning document was removed. Apart from that it's the same code as before the window: no features, logic or tests were added or changed. The tag was moved to the sanitised commit.
 
 Everything after that tag was built inside the window. You can review the diff with `git diff pre-window-v0.3.0..HEAD`. It covers:
 - fictional Halden & Rook demo data with the 5 puzzles
