@@ -9,6 +9,8 @@ Open Agent Hackathon 2026. Track 03: Reasoning Architecture.
 
 **Model:** NVIDIA Nemotron 3 Ultra 550B via Meterless Nightshift (local Qwen 2.5 3B fallback, then Nebius).
 
+**Pitch deck:** [docs/Trade-Memory-Deck.pdf](docs/Trade-Memory-Deck.pdf) (12 slides) · **Demo video:** [docs/demo/trade-memory-demo.mp4](docs/demo/trade-memory-demo.mp4)
+
 ![Why desk, live Zetaris](docs/screens/06-why-desk-live-zetaris.png)
 
 ## The five puzzles in the demo data
